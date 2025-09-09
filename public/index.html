@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>La 27 Detailing</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}"/>
+</head>
+<body>
+
+  <header>
+    <div class="logo-block">
+      <img src="{% static 'logola27.png' %}" alt="La 27 Detailing" />
+    </div>
+    <a href="#reserva" class="btn">RESERVA TU TURNO!</a>
+  </header>
+
+ <section class="hero">
+  ESTÉTICA VEHICULAR
+</section>
+
+
+  <section class="services">
+    <a href="#modal-lavado" class="service-button">LAVADO</a>
+    <a href="#modal-tratamientos" class="service-button">TRATAMIENTOS</a>
+    <a href="#modal-interior" class="service-button">INTERIOR</a>
+  </section>
+
+  <div id="modal-lavado" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a> <h2>Servicio de Lavado</h2>
+      <p><strong>Lavado común:</strong> Limpieza exterior rápida, interior, llantas y vidrios.</p>
+      <p><strong>Lavado premium:</strong> Lavado a mano, encerado, interior, llantas a fondo y secado con microfibra.</p>
+    </div>
+  </div>
+
+  <div id="modal-tratamientos" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a> <h2>Tratamientos</h2>
+      <p>Abrillantado</p>
+      <p>Corrección de pintura en 2 pasos</p>
+      <p>Tratamientos</p>
+    </div>
+  </div>
+
+  <div id="modal-interior" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a> <h2>Servicio de Interior</h2>
+      <p>Aspirado profundo, limpieza de tapizados, paneles, consola y tratamiento de plásticos.</p>
+    </div>
+  </div>
+
+  <div class="calendar-container" id="reserva">
+    <h3>Calendario de Turnos ({{ current_month_name }} {{ current_year }})</h3>
+
+    <p>
+      <a href="?month={{ prev_month.month }}&year={{ prev_month.year }}">← Anterior</a> |
+      <a href="?month={{ next_month.month }}&year={{ next_month.year }}">Siguiente →</a>
+    </p>
+
+    <table class="calendar-table">
+      <thead>
+        <tr>
+          <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in calendar_weeks %}
+        <tr>
+          {% for day in week %}
+            {% if day.date %}
+            <td class="{% if day.is_today %}today{% endif %} {% if day.has_reservation %}has-reservation{% endif %}">
+              <a href="?month={{ current_month.month }}&year={{ current_month.year }}&selected_date={{ day.date|date:'Y-m-d' }}">
+                {{ day.date.day }}
+                {% if day.has_reservation %}
+                <br /><small>Reservado</small>
+                {% endif %}
+              </a>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="booking-form">
+      <h3>Reservar Turno</h3>
+      {% if messages %}
+        <ul class="message-box {% if message.tags %}{{ message.tags }}{% endif %}">
+          {% for message in messages %}
+          <li style="list-style: none;">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post" action="/">
+        {% csrf_token %}
+        <input type="text" name="fecha_display" value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }}{% endif %}" readonly placeholder="Fecha seleccionada" />
+        <input type="hidden" name="fecha" value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }} 17:00:00{% endif %}" />
+        <input type="text" name="nombre" placeholder="Tu nombre" required />
+        <input type="tel" name="telefono" placeholder="Tu teléfono" required 
+        pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números" />
+        <input type="submit" value="Confirmar Reserva" />
+      </form>
+    </div>
+  </div>
+
+  <div id="contacto-modal" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a> <h2>Información de Contacto</h2>
+      <p>Teléfono: <a href="tel:+543644364703" class="contact-link">3644-364703</a></p>
+      <p>WhatsApp: <a href="https://wa.me/543644364703" target="_blank" class="contact-link">Abrir chat en WhatsApp</a></p>
+      <p>Instagram: <a href="https://www.instagram.com/la27detailing/" target="_blank" class="contact-link">@la27detailing</a></p>
+    </div>
+  </div>
+
+  <footer style="text-align: center; padding: 30px; background-color: #f2f2f2; margin-top: 30px;">
+    <p>¿Dudas o consultas? <a href="#contacto-modal" class="btn-footer-contact">Contáctanos</a></p>
+    <p>&copy; 2025 La 27 Detailing. Todos los derechos reservados.</p>
+  </footer>
+
+</body>
+</html>

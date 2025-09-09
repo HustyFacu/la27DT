@@ -1,0 +1,429 @@
+/* public/style.css */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  line-height: 1.6; /* Mejora la legibilidad del texto */
+  color: #333;
+}
+
+header {
+  background: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: center; /* Esto centra horizontalmente el logo */
+  height: 130px; /* Ajusta la altura del header si es necesario */
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  position: relative; /* Necesario para posicionar el botón de reserva */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave para el header */
+}
+
+.logo-block  {
+  height: 300px; /* Puede que quieras reducir esto si el logo es muy grande para el header */
+  max-height: 300px;
+  width: auto;
+}
+
+/* Estilos para el botón de "RESERVA TU TURNO!" (que ahora es un <a>) */
+.btn {
+  background: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px 18px; /* Un poco más de padding horizontal */
+  cursor: pointer;
+  border-radius: 5px;
+  text-decoration: none; /* Eliminar subrayado si es un <a> */
+  display: flex; /* Para centrar texto si es necesario */
+  justify-content: center;
+  align-items: center;
+  font-weight: bold; /* Hacer el texto más notable */
+  transition: background 0.3s ease, transform 0.2s ease; /* Añadir transición para hover */
+
+  /* Posicionamiento a la derecha del header */
+  position: absolute;
+  top: 100px; /* Ajusta esto según el alto del header, para que quede debajo del logo */
+  right: 20px;
+}
+
+.btn:hover {
+  background: #0056b3; /* Color más oscuro al pasar el ratón */
+  transform: translateY(-2px); /* Pequeño efecto de elevación */
+}
+
+.hero {
+  background-image: url('/Foto1.png'); /* Asegúrate de que la ruta sea correcta */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 2.5em; /* Un poco más grande */
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Sombra para el texto */
+  min-height: 300px; /* Altura mínima para que la imagen se vea bien */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+
+.services {
+  display: flex;
+  justify-content: center; /* Centra los botones de servicio */
+  gap: 15px; /* Más espacio entre los botones */
+  background: #00b5ad;
+  padding: 20px; /* Más padding */
+  flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
+  box-shadow: inset 0 3px 5px rgba(0,0,0,0.2); /* Sombra interna sutil */
+}
+
+/* Estilos para los enlaces de servicio (que ahora son <a> con la clase `service-button`) */
+.service-button { /* Se aplica directamente sin .services */
+  flex: 1; /* Permite que los botones ocupen espacio equitativo */
+  min-width: 140px; /* Ajusta el ancho mínimo si es necesario */
+  max-width: 200px; /* Limita el ancho máximo para que no sean demasiado grandes */
+  background: #00b5ad; /* Color de fondo del contenedor */
+  color: white;
+  font-weight: bold;
+  border: 2px solid white; /* Borde más pronunciado */
+  padding: 15px 25px; /* Más padding interno */
+  cursor: pointer;
+  text-decoration: none; /* Quita el subrayado por ser un enlace */
+  display: flex; /* Para centrar el texto dentro del botón */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 8px; /* Bordes ligeramente redondeados */
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease; /* Transiciones suaves */
+}
+
+.service-button:hover {
+  background: #009999; /* Color más oscuro al pasar el ratón */
+  border-color: #eee; /* Borde más claro al pasar el ratón */
+  transform: translateY(-3px); /* Efecto de elevación sutil */
+}
+
+
+/* --- ESTILOS PARA LOS MODALES (CSS-ONLY) --- */
+
+.modal {
+  display: none; /* Por defecto, los modales están ocultos */
+  position: fixed; /* Fijo en la ventana de visualización */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente más oscuro */
+  display: flex; /* Usamos flex para centrar */
+  justify-content: center; /* Centra el contenido horizontalmente */
+  align-items: center; /* Centra el contenido verticalmente */
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  /* Añadir una transición suave para la aparición/desaparición */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; /* Permite clics a través si está oculto */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Cuando el modal es el objetivo de la URL, lo mostramos */
+.modal:target {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto; /* Permite clics cuando está visible */
+}
+
+.modal-content {
+  background: white;
+  padding: 30px; /* Más padding */
+  border-radius: 10px;
+  max-width: 550px; /* Un poco más de ancho */
+  width: 90%; /* Ajusta el ancho para pantallas más pequeñas */
+  position: relative; /* Necesario para posicionar el botón de cierre */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+  transform: translateY(-20px); /* Efecto de entrada desde arriba */
+  transition: transform 0.3s ease-out; /* Transición para el efecto de entrada */
+}
+
+.modal:target .modal-content {
+  transform: translateY(0); /* Vuelve a la posición original cuando es visible */
+}
+
+
+/* Estilos para el botón de cierre (la "X") */
+.close-btn {
+  position: absolute;
+  top: 15px; /* Más espacio desde arriba */
+  right: 20px; /* Más espacio desde la derecha */
+  cursor: pointer;
+  font-size: 28px; /* Un poco más grande para que sea fácil de ver */
+  text-decoration: none; /* Quita el subrayado del enlace */
+  color: #888; /* Color del símbolo de cierre */
+  font-weight: bold;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #333; /* Cambia a negro más oscuro al pasar el ratón */
+}
+
+.modal-content h2 {
+  color: #007BFF;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+}
+
+.modal-content p {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.modal-content p strong {
+  color: #007BFF;
+}
+
+/* --- Estilos del Calendario --- */
+.calendar-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 40px auto; /* Más margen arriba y abajo */
+  border: 1px solid #ddd;
+  border-radius: 10px; /* Bordes más redondeados */
+  background: #fdfdfd; /* Blanco casi total */
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra suave */
+}
+
+.calendar-container h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.8em;
+}
+
+.calendar-container p {
+  margin-bottom: 25px;
+  font-size: 1.1em;
+}
+
+.calendar-container p a {
+  text-decoration: none;
+  color: #007BFF;
+  font-weight: bold;
+  margin: 0 15px; /* Más espacio entre los enlaces */
+  transition: color 0.2s ease;
+}
+
+.calendar-container p a:hover {
+  color: #0056b3;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px; /* Más margen */
+}
+
+.calendar-table th, .calendar-table td {
+  border: 1px solid #eee;
+  padding: 12px 5px; /* Más padding vertical */
+  text-align: center;
+  width: calc(100% / 7); /* Divide el ancho equitativamente entre 7 días */
+  vertical-align: top; /* Alinea el contenido en la parte superior de la celda */
+  height: 90px; /* Altura fija para cada celda */
+  font-size: 1em;
+}
+
+.calendar-table th {
+  background-color: #e9e9e9; /* Gris más claro */
+  color: #555;
+  font-weight: bold;
+  text-transform: uppercase; /* Mayúsculas para los días de la semana */
+}
+
+.calendar-table td {
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-table td a {
+  display: block; /* Hace que el enlace ocupe toda la celda */
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  height: 100%;
+  padding: 5px 0; /* Ajuste de padding si es necesario */
+  box-sizing: border-box; /* Incluye padding en la altura total */
+}
+
+.calendar-table td:hover {
+  background-color: #f0f0f0; /* Un gris más claro al pasar el ratón */
+}
+
+.calendar-table td.today {
+  background-color: #e6f7ff; /* Azul muy claro para hoy */
+  border: 2px solid #007BFF; /* Borde más pronunciado */
+}
+
+.calendar-table td.today a {
+  color: #007BFF;
+}
+
+.calendar-table td.has-reservation {
+  background-color: #fff0d6; /* Naranja muy claro para días reservados */
+  color: #d35400; /* Naranja oscuro para texto */
+}
+
+.calendar-table td.has-reservation a {
+  color: #d35400;
+}
+
+.calendar-table td.has-reservation small {
+  font-size: 0.85em; /* Un poco más grande */
+  color: #a04000;
+  font-weight: normal; /* No tan negrita */
+}
+
+
+/* Estilos del formulario de reserva */
+.booking-form {
+  background: #fff;
+  padding: 25px; /* Más padding */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.booking-form h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px; /* Más margen */
+  font-size: 1.6em;
+}
+
+.booking-form input[type="text"],
+.booking-form input[type="tel"] {
+  width: calc(100% - 22px); /* Ajuste por el borde y padding */
+  padding: 12px; /* Más padding */
+  margin-bottom: 18px; /* Más margen */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+
+.booking-form input[type="submit"] {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 14px 25px; /* Más padding */
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2em; /* Texto más grande */
+  width: 100%;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.booking-form input[type="submit"]:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+/* Estilos de mensajes (de Django messages framework) */
+.message-box {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.message-box.success {
+    background-color: #d4edda; /* Verde claro */
+    color: #155724; /* Verde oscuro */
+    border: 1px solid #c3e6cb;
+}
+
+.message-box.error {
+    background-color: #f8d7da; /* Rojo claro */
+    color: #721c24; /* Rojo oscuro */
+    border: 1px solid #f5c6cb;
+}
+
+.message-box.info {
+    background-color: #d1ecf1; /* Azul claro */
+    color: #0c5460; /* Azul oscuro */
+    border: 1px solid #bee5eb;
+}
+
+/* Estilos para el nuevo botón de contacto en el footer */
+.btn-footer-contact {
+  background: #555;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.btn-footer-contact:hover {
+  background: #777;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 20px; /* Más espacio abajo del header */
+  }
+  .btn {
+    position: static; /* Quita el posicionamiento absoluto */
+    margin-top: 15px; /* Añade espacio debajo del logo */
+    width: 90%; /* Hace el botón más ancho en móviles */
+    max-width: 300px; /* Limita su ancho */
+  }
+  .hero {
+    font-size: 1.8em;
+    padding: 40px 15px;
+  }
+  .services {
+    flex-direction: column; /* Apila los botones de servicio */
+    gap: 10px;
+    padding: 15px;
+  }
+  .service-button { /* Se aplica directamente sin .services */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: none; /* Elimina el límite de ancho */
+  }
+  .calendar-container {
+    margin: 20px auto;
+    padding: 15px;
+  }
+  .calendar-table th, .calendar-table td {
+    padding: 8px 3px;
+    height: 70px;
+    font-size: 0.85em;
+  }
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
+  .modal-content h2 {
+    font-size: 1.5em;
+  }
+  .close-btn {
+    font-size: 24px;
+    top: 10px;
+    right: 15px;
+  }
+  .booking-form {
+    padding: 15px;
+  }
+}
