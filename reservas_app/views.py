@@ -98,7 +98,7 @@ def calendar_view(request):
         else:
             try:
                 fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
-                fecha_dt = timezone.make_aware(fecha_dt)
+               
 
                 fecha_reserva_date = fecha_dt.date()
 
@@ -107,6 +107,7 @@ def calendar_view(request):
                 else:
                     Reserva.objects.create(fecha=fecha_dt, nombre=nombre, telefono=telefono)
                     messages.success(request, '✅ Reserva guardada con éxito!')
+                    messages.success(request, f'{fecha_dt}')
                     return redirect(f"/?month={current_month_date.month}&year={current_month_date.year}")
             except ValueError:
                 messages.error(request, '⚠️ Fecha u hora inválida. Selecciona una fecha válida y una hora en formato correcto.')
