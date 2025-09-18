@@ -9,7 +9,7 @@ class Reserva(models.Model):
     def __str__(self):
         # Asegúrate de importar timezone si no lo has hecho en views.py
         # o de usar un formato simple que no necesite timezone aquí si no quieres
-        return f"Reserva de {self.nombre} ({self.telefono}) para {self.fecha.strftime('%d/%m/%Y %H:%M')}"
+        return f"Reserva de {self.nombre} ({self.telefono}) para {self.fecha}"
 
     class Meta:
         verbose_name = "Reserva"

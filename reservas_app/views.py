@@ -4,9 +4,8 @@ from django.utils import timezone
 from .models import Reserva
 from django.contrib import messages
 import calendar
-from datetime import datetime, date, timedelta # Importar timedelta
+from datetime import datetime, date, timedelta
 
-# Clase auxiliar para representar un día en el calendario
 class DayData:
     def __init__(self, date=None, is_today=False, has_reservation=False):
         self.date = date
@@ -14,56 +13,43 @@ class DayData:
         self.has_reservation = has_reservation
 
 def calendar_view(request):
-    # --- Manejo seguro de 'year' y 'month' desde la URL ---
-    # Para 'year'
     year_str = request.GET.get('year')
     if year_str:
         try:
             current_year = int(year_str)
         except ValueError:
-            # Si el valor no es un número válido, usa el año actual
             current_year = timezone.now().year
             messages.warning(request, 'El año proporcionado no es válido. Mostrando el año actual.')
     else:
-        # Si 'year' no se proporciona o es una cadena vacía, usa el año actual
         current_year = timezone.now().year
 
-    # Para 'month'
     month_str = request.GET.get('month')
     if month_str:
         try:
             current_month = int(month_str)
-            # Asegúrate de que el mes esté en el rango válido
             if not 1 <= current_month <= 12:
                 current_month = timezone.now().month
                 messages.warning(request, 'El mes proporcionado no es válido. Mostrando el mes actual.')
         except ValueError:
-            # Si el valor no es un número válido, usa el mes actual
             current_month = timezone.now().month
             messages.warning(request, 'El mes proporcionado no es válido. Mostrando el mes actual.')
     else:
-        # Si 'month' no se proporciona o es una cadena vacía, usa el mes actual
         current_month = timezone.now().month
-    # --- Fin del manejo seguro ---
 
-    # Crear un objeto date para el primer día del mes actual
     current_month_date = date(current_year, current_month, 1)
 
-    # Calcular el mes siguiente y el mes anterior
     next_month_date = current_month_date.replace(day=28) + timedelta(days=4)
     next_month_date = next_month_date.replace(day=1)
 
     prev_month_date = current_month_date - timedelta(days=1)
     prev_month_date = prev_month_date.replace(day=1)
 
-    # Obtener todas las reservas para el mes actual
     start_of_month = timezone.make_aware(datetime(current_year, current_month, 1, 0, 0, 0))
-
     if current_month == 12:
         end_of_month = timezone.make_aware(datetime(current_year + 1, 1, 1, 0, 0, 0))
     else:
         end_of_month = timezone.make_aware(datetime(current_year, current_month + 1, 1, 0, 0, 0))
-    end_of_month -= timedelta(microseconds=1) # Un microsegundo antes del inicio del siguiente mes
+    end_of_month -= timedelta(microseconds=1)
 
     try:
         reservations_in_month = Reserva.objects.filter(
@@ -75,12 +61,11 @@ def calendar_view(request):
         messages.error(request, f"Error al cargar reservas: {e}. Puede que la base de datos no esté accesible.")
         reserved_dates = set()
 
-
-    cal = calendar.Calendar(firstweekday=0) # Lunes como primer día de la semana
+    cal = calendar.Calendar(firstweekday=0)
     month_days = cal.monthdatescalendar(current_year, current_month)
 
     calendar_weeks_data = []
-    today = timezone.localdate() # Usa localdate para comparaciones de fecha
+    today = timezone.localdate()
 
     for week in month_days:
         week_data = []
@@ -100,19 +85,22 @@ def calendar_view(request):
             selected_date_obj = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
         except ValueError:
             messages.warning(request, 'La fecha seleccionada no tiene el formato correcto.')
-            pass
 
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         telefono = request.POST.get('telefono')
         fecha_str = request.POST.get('fecha')
 
-        if not fecha_str or not nombre or not telefono:
+        if not nombre or not telefono:
             messages.error(request, '⚠️ Todos los campos son obligatorios.')
+        elif not fecha_str:
+            messages.error(request, '⚠️ Debes elegir una fecha y una hora para el turno.')
         else:
             try:
-                fecha_reserva_date = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-                fecha_dt = timezone.make_aware(datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S'))
+                fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
+                fecha_dt = timezone.make_aware(fecha_dt)
+
+                fecha_reserva_date = fecha_dt.date()
 
                 if Reserva.objects.filter(fecha__date=fecha_reserva_date).exists():
                     messages.error(request, '⛔ Ese turno ya está reservado para ese día.')
@@ -121,7 +109,7 @@ def calendar_view(request):
                     messages.success(request, '✅ Reserva guardada con éxito!')
                     return redirect(f"/?month={current_month_date.month}&year={current_month_date.year}")
             except ValueError:
-                messages.error(request, 'Fecha o formato de fecha inválido. Asegúrate de seleccionar una fecha válida.')
+                messages.error(request, '⚠️ Fecha u hora inválida. Selecciona una fecha válida y una hora en formato correcto.')
             except Exception as e:
                 messages.error(request, f'Error al guardar la reserva: {e}')
 

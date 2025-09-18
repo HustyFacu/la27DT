@@ -16,10 +16,9 @@
     <a href="#reserva" class="btn">RESERVA TU TURNO!</a>
   </header>
 
- <section class="hero">
-  ESTÉTICA VEHICULAR
-</section>
-
+  <section class="hero">
+    ESTÉTICA VEHICULAR
+  </section>
 
   <section class="services">
     <a href="#modal-lavado" class="service-button">LAVADO</a>
@@ -97,13 +96,22 @@
         </ul>
       {% endif %}
 
-      <form method="post" action="/">
+      <form method="post" action="/" id="reserva-form">
         {% csrf_token %}
-        <input type="text" name="fecha_display" value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }}{% endif %}" readonly placeholder="Fecha seleccionada" />
-        <input type="hidden" name="fecha" value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }} 17:00:00{% endif %}" />
+        <!-- Fecha seleccionada -->
+        <input type="text" id="fecha-display" name="fecha_display"
+               value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }}{% endif %}"
+               readonly placeholder="Fecha seleccionada" />
+
+        <!-- Hora del turno -->
+        <input type="time" id="hora" name="hora" required />
+
+        <!-- Campo oculto que se completa con fecha+hora -->
+        <input type="hidden" name="fecha" id="fecha-hidden" />
+
         <input type="text" name="nombre" placeholder="Tu nombre" required />
         <input type="tel" name="telefono" placeholder="Tu teléfono" required 
-        pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números" />
+               pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números" />
         <input type="submit" value="Confirmar Reserva" />
       </form>
     </div>
@@ -122,6 +130,22 @@
     <p>¿Dudas o consultas? <a href="#contacto-modal" class="btn-footer-contact">Contáctanos</a></p>
     <p>&copy; 2025 La 27 Detailing. Todos los derechos reservados.</p>
   </footer>
+
+  <script>
+    // Combina fecha seleccionada + hora antes de enviar
+    document.getElementById("reserva-form").addEventListener("submit", function(e) {
+      const fecha = document.getElementById("fecha-display").value;
+      const hora = document.getElementById("hora").value;
+
+      if (!fecha || !hora) {
+        alert("⚠️ Debes elegir una fecha y una hora.");
+        e.preventDefault();
+        return;
+      }
+
+      document.getElementById("fecha-hidden").value = fecha + " " + hora + ":00";
+    });
+  </script>
 
 </body>
 </html>
