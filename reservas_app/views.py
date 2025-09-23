@@ -13,6 +13,7 @@ class DayData:
         self.has_reservation = has_reservation
 
 def calendar_view(request):
+    # Determinar año
     year_str = request.GET.get('year')
     if year_str:
         try:
@@ -23,6 +24,7 @@ def calendar_view(request):
     else:
         current_year = timezone.now().year
 
+    # Determinar mes
     month_str = request.GET.get('month')
     if month_str:
         try:
@@ -38,12 +40,13 @@ def calendar_view(request):
 
     current_month_date = date(current_year, current_month, 1)
 
+    # Mes siguiente y anterior
     next_month_date = current_month_date.replace(day=28) + timedelta(days=4)
     next_month_date = next_month_date.replace(day=1)
-
     prev_month_date = current_month_date - timedelta(days=1)
     prev_month_date = prev_month_date.replace(day=1)
 
+    # Rango de fechas del mes (aware)
     start_of_month = timezone.make_aware(datetime(current_year, current_month, 1, 0, 0, 0))
     if current_month == 12:
         end_of_month = timezone.make_aware(datetime(current_year + 1, 1, 1, 0, 0, 0))
@@ -51,6 +54,7 @@ def calendar_view(request):
         end_of_month = timezone.make_aware(datetime(current_year, current_month + 1, 1, 0, 0, 0))
     end_of_month -= timedelta(microseconds=1)
 
+    # Reservas del mes
     try:
         reservations_in_month = Reserva.objects.filter(
             fecha__gte=start_of_month,
@@ -61,9 +65,9 @@ def calendar_view(request):
         messages.error(request, f"Error al cargar reservas: {e}. Puede que la base de datos no esté accesible.")
         reserved_dates = set()
 
+    # Crear estructura del calendario
     cal = calendar.Calendar(firstweekday=0)
     month_days = cal.monthdatescalendar(current_year, current_month)
-
     calendar_weeks_data = []
     today = timezone.localdate()
 
@@ -78,6 +82,7 @@ def calendar_view(request):
                 week_data.append(DayData())
         calendar_weeks_data.append(week_data)
 
+    # Fecha seleccionada
     selected_date_str = request.GET.get('selected_date')
     selected_date_obj = None
     if selected_date_str:
@@ -86,6 +91,7 @@ def calendar_view(request):
         except ValueError:
             messages.warning(request, 'La fecha seleccionada no tiene el formato correcto.')
 
+    # Guardar reserva (POST)
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         telefono = request.POST.get('telefono')
@@ -97,23 +103,24 @@ def calendar_view(request):
             messages.error(request, '⚠️ Debes elegir una fecha y una hora para el turno.')
         else:
             try:
+                # Convertimos a datetime aware
                 fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
-               
+                fecha_dt = timezone.make_aware(fecha_dt)
 
-                fecha_reserva_date = fecha_dt.date()
-
-                if Reserva.objects.filter(fecha__date=fecha_reserva_date).exists():
-                    messages.error(request, '⛔ Ese turno ya está reservado para ese día.')
+                # Validamos duplicado exacto fecha + hora
+                if Reserva.objects.filter(fecha=fecha_dt).exists():
+                    messages.error(request, '⛔ Ese turno ya está reservado a esa hora exacta.')
                 else:
                     Reserva.objects.create(fecha=fecha_dt, nombre=nombre, telefono=telefono)
                     messages.success(request, '✅ Reserva guardada con éxito!')
-                    messages.success(request, f'{fecha_dt}')
                     return redirect(f"/?month={current_month_date.month}&year={current_month_date.year}")
+
             except ValueError:
-                messages.error(request, '⚠️ Fecha u hora inválida. Selecciona una fecha válida y una hora en formato correcto.')
+                messages.error(request, '⚠️ Fecha u hora inválida. Selecciona una fecha válida en formato YYYY-MM-DD HH:MM:SS.')
             except Exception as e:
                 messages.error(request, f'Error al guardar la reserva: {e}')
 
+    # Contexto para template
     context = {
         'current_month_name': calendar.month_name[current_month_date.month],
         'current_year': current_month_date.year,
