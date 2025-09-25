@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'la27detailing_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'la27_dt',         # Reemplaza con el nombre de tu DB si es diferente (generalmente 'postgres')
+        'NAME': 'La27_dtl',         # Reemplaza con el nombre de tu DB si es diferente (generalmente 'postgres')
         'USER': 'root',         # Reemplaza con tu usuario (generalmente 'postgres')
         'PASSWORD': 'facundo99',
         'HOST': '127.0.0.1',
