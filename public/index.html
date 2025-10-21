@@ -1,34 +1,45 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>La 27 Detailing</title>
-  <link rel="stylesheet" href="{% static 'style.css' %}"/>
+  
 </head>
 <body>
 
   <header>
     <div class="logo-block">
-      <img src="{% static 'logola27.png' %}" alt="La 27 Detailing" />
+      <img src="logola27.png" alt="La 27 Detailing" />
     </div>
-    <a href="#reserva" class="btn">RESERVA TU TURNO!</a>
+    <a href="#reserva" class="btn">🚗 RESERVA TU TURNO</a>
   </header>
 
   <section class="hero">
-    ESTÉTICA VEHICULAR
+    <div class="hero-content">
+      ESTÉTICA VEHICULAR
+    </div>
   </section>
 
   <section class="services">
-    <a href="#modal-lavado" class="service-button">LAVADO</a>
-    <a href="#modal-tratamientos" class="service-button">TRATAMIENTOS</a>
-    <a href="#modal-interior" class="service-button">INTERIOR</a>
+    <a href="#modal-lavado" class="service-button">
+      <span class="icon">🧼</span>
+      LAVADO
+    </a>
+    <a href="#modal-tratamientos" class="service-button">
+      <span class="icon">✨</span>
+      TRATAMIENTOS
+    </a>
+    <a href="#modal-interior" class="service-button">
+      <span class="icon">🪑</span>
+      INTERIOR
+    </a>
   </section>
 
   <div id="modal-lavado" class="modal">
     <div class="modal-content">
-      <a href="#" class="close-btn">&times;</a> <h2>Servicio de Lavado</h2>
+      <a href="#" class="close-btn">&times;</a>
+      <h2>🧼 Servicio de Lavado</h2>
       <p><strong>Lavado común:</strong> Limpieza exterior rápida, interior, llantas y vidrios.</p>
       <p><strong>Lavado premium:</strong> Lavado a mano, encerado, interior, llantas a fondo y secado con microfibra.</p>
     </div>
@@ -36,27 +47,30 @@
 
   <div id="modal-tratamientos" class="modal">
     <div class="modal-content">
-      <a href="#" class="close-btn">&times;</a> <h2>Tratamientos</h2>
-      <p>Abrillantado</p>
-      <p>Corrección de pintura en 2 pasos</p>
-      <p>Tratamientos</p>
+      <a href="#" class="close-btn">&times;</a>
+      <h2>✨ Tratamientos</h2>
+      <p><strong>Abrillantado:</strong> Restauración del brillo original de la pintura.</p>
+      <p><strong>Corrección de pintura en 2 pasos:</strong> Eliminación de imperfecciones y pulido profesional.</p>
+      <p><strong>Tratamientos especiales:</strong> Protección cerámica y sellado de pintura.</p>
     </div>
   </div>
 
   <div id="modal-interior" class="modal">
     <div class="modal-content">
-      <a href="#" class="close-btn">&times;</a> <h2>Servicio de Interior</h2>
-      <p>Aspirado profundo, limpieza de tapizados, paneles, consola y tratamiento de plásticos.</p>
+      <a href="#" class="close-btn">&times;</a>
+      <h2>🪑 Servicio de Interior</h2>
+      <p>Aspirado profundo, limpieza de tapizados, paneles, consola y tratamiento de plásticos para dejar tu interior como nuevo.</p>
     </div>
   </div>
 
   <div class="calendar-container" id="reserva">
-    <h3>Calendario de Turnos ({{ current_month_name }} {{ current_year }})</h3>
+    <h3>📅 Calendario de Turnos</h3>
 
-    <p>
-      <a href="?month={{ prev_month.month }}&year={{ prev_month.year }}">← Anterior</a> |
-      <a href="?month={{ next_month.month }}&year={{ next_month.year }}">Siguiente →</a>
-    </p>
+    <div class="calendar-nav">
+      <a href="#">← Anterior</a>
+      <span>Octubre 2025</span>
+      <a href="#">Siguiente →</a>
+    </div>
 
     <table class="calendar-table">
       <thead>
@@ -65,87 +79,1176 @@
         </tr>
       </thead>
       <tbody>
-        {% for week in calendar_weeks %}
         <tr>
-          {% for day in week %}
-            {% if day.date %}
-            <td class="{% if day.is_today %}today{% endif %} {% if day.has_reservation %}has-reservation{% endif %}">
-              <a href="?month={{ current_month.month }}&year={{ current_month.year }}&selected_date={{ day.date|date:'Y-m-d' }}">
-                {{ day.date.day }}
-                {% if day.has_reservation %}
-                <br /><small>Reservado</small>
-                {% endif %}
-              </a>
-            </td>
-            {% else %}
-            <td></td>
-            {% endif %}
-          {% endfor %}
+          <td></td><td></td><td><a href="#">1</a></td><td><a href="#">2</a></td><td><a href="#">3</a></td><td><a href="#">4</a></td><td><a href="#">5</a></td>
         </tr>
-        {% endfor %}
+        <tr>
+          <td><a href="#">6</a></td><td class="today"><a href="#">7</a></td><td><a href="#">8</a></td><td><a href="#">9</a></td><td class="has-reservation"><a href="#">10<br><small>Reservado</small></a></td><td><a href="#">11</a></td><td><a href="#">12</a></td>
+        </tr>
+        <tr>
+          <td><a href="#">13</a></td><td><a href="#">14</a></td><td><a href="#">15</a></td><td><a href="#">16</a></td><td><a href="#">17</a></td><td><a href="#">18</a></td><td><a href="#">19</a></td>
+        </tr>
+        <tr>
+          <td><a href="#">20</a></td><td><a href="#">21</a></td><td><a href="#">22</a></td><td><a href="#">23</a></td><td><a href="#">24</a></td><td><a href="#">25</a></td><td><a href="#">26</a></td>
+        </tr>
+        <tr>
+          <td><a href="#">27</a></td><td><a href="#">28</a></td><td><a href="#">29</a></td><td><a href="#">30</a></td><td><a href="#">31</a></td><td></td><td></td>
+        </tr>
       </tbody>
     </table>
 
     <div class="booking-form">
-      <h3>Reservar Turno</h3>
-      {% if messages %}
-        <ul class="message-box {% if message.tags %}{{ message.tags }}{% endif %}">
-          {% for message in messages %}
-          <li style="list-style: none;">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
+      <h3>✅ Reservar Turno</h3>
+      
+      <div class="steps-indicator">
+        <div class="step active" data-step="1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Fecha y Hora</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Servicio</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Tus Datos</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-circle">4</div>
+          <div class="step-label">Confirmar</div>
+        </div>
+      </div>
+      
+      <form id="reserva-form" method="POST" action="{% url 'calendar_view' %}">
+      {% csrf_token %}
+        <!-- Paso 1: Fecha y Hora -->
+        <div class="form-section active" data-section="1">
+          <div class="form-group">
+            <label for="fecha-display">📅 Fecha seleccionada:</label>
+            <input type="text" id="fecha-display" name="fecha_display" readonly placeholder="Selecciona una fecha en el calendario" required />
+          </div>
 
-      <form method="post" action="/" id="reserva-form">
-        {% csrf_token %}
-        <!-- Fecha seleccionada -->
-        <input type="text" id="fecha-display" name="fecha_display"
-               value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }}{% endif %}"
-               readonly placeholder="Fecha seleccionada" />
+          <div id="time-slots-wrapper" style="display: none;">
+            <div class="time-slots-container">
+              <h4>🕐 Selecciona un horario disponible:</h4>
+              <div class="time-slots-grid" id="time-slots-grid">
+              </div>
+            </div>
+          </div>
 
-        <!-- Hora del turno -->
-        <input type="time" id="hora" name="hora" required />
+          <div id="no-date-message" class="no-date-selected">
+            👆 Selecciona primero una fecha en el calendario para ver los horarios disponibles
+          </div>
 
-        <!-- Campo oculto que se completa con fecha+hora -->
-        <input type="hidden" name="fecha" id="fecha-hidden" />
+          <div class="form-group" style="display: none;" id="hora-group">
+            <input type="time" id="hora" name="hora" readonly style="display: none;" />
+          </div>
 
-        <input type="text" name="nombre" placeholder="Tu nombre" required />
-        <input type="tel" name="telefono" placeholder="Tu teléfono" required 
-               pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números" />
-        <input type="submit" value="Confirmar Reserva" />
+          <div class="form-navigation">
+            <button type="button" class="btn-next" onclick="nextStep(2)" id="btn-step1-next">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 2: Servicio -->
+        <div class="form-section" data-section="2">
+          <div class="form-group">
+            <label for="tipo-servicio">🚗 Tipo de servicio:</label>
+            <select id="tipo-servicio" name="tipo_servicio" required>
+              <option value="">Selecciona un servicio</option>
+              <option value="lavado-comun">Lavado Común</option>
+              <option value="lavado-premium">Lavado Premium</option>
+              <option value="abrillantado">Abrillantado</option>
+              <option value="correccion-pintura">Corrección de Pintura</option>
+              <option value="interior">Limpieza de Interior</option>
+              <option value="otro">Otro (especificar abajo)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="detalles-trabajo">📝 Detalles del trabajo:</label>
+            <textarea id="detalles-trabajo" name="detalles_trabajo" placeholder="Describe el trabajo que deseas realizar en tu vehículo..."></textarea>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(1)">← Anterior</button>
+            <button type="button" class="btn-next" onclick="nextStep(3)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 3: Datos personales -->
+        <div class="form-section" data-section="3">
+          <div class="form-group">
+            <label for="nombre">👤 Tu nombre:</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre completo" required />
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">📱 Tu teléfono:</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="Número de contacto" required pattern="[0-9]+" inputmode="numeric" />
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(2)">← Anterior</button>
+            <button type="button" class="btn-next" onclick="nextStep(4)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 4: Confirmación -->
+        <div class="form-section" data-section="4">
+          <div style="background: white; padding: 30px; border-radius: 20px; margin-bottom: 25px; border: 3px solid #dcfce7;">
+            <h4 style="margin-top: 0; color: #228B22; font-size: 1.5em;">📋 Resumen de tu reserva:</h4>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Fecha:</strong> <span id="resumen-fecha">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Hora:</strong> <span id="resumen-hora">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Servicio:</strong> <span id="resumen-servicio">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Detalles:</strong> <span id="resumen-detalles">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Nombre:</strong> <span id="resumen-nombre">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Teléfono:</strong> <span id="resumen-telefono">-</span></p>
+          </div>
+
+          <input type="hidden" name="fecha" id="fecha-hidden" />
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(3)">← Anterior</button>
+            <button type="submit" class="btn-submit">Confirmar Reserva ✓</button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
 
   <div id="contacto-modal" class="modal">
     <div class="modal-content">
-      <a href="#" class="close-btn">&times;</a> <h2>Información de Contacto</h2>
-      <p>Teléfono: <a href="tel:+543644364703" class="contact-link">3644-364703</a></p>
-      <p>WhatsApp: <a href="https://wa.me/543644364703" target="_blank" class="contact-link">Abrir chat en WhatsApp</a></p>
-      <p>Instagram: <a href="https://www.instagram.com/la27detailing/" target="_blank" class="contact-link">@la27detailing</a></p>
+      <a href="#" class="close-btn">&times;</a>
+      <h2>📞 Información de Contacto</h2>
+      <p><strong>Teléfono:</strong> <a href="tel:+543644364703" class="contact-link">3644-364703</a></p>
+      <p><strong>WhatsApp:</strong> <a href="https://wa.me/543644364703" target="_blank" class="contact-link">Abrir chat en WhatsApp</a></p>
+      <p><strong>Instagram:</strong> <a href="https://www.instagram.com/la27detailing/" target="_blank" class="contact-link">@la27detailing</a></p>
     </div>
   </div>
 
-  <footer style="text-align: center; padding: 30px; background-color: #f2f2f2; margin-top: 30px;">
-    <p>¿Dudas o consultas? <a href="#contacto-modal" class="btn-footer-contact">Contáctanos</a></p>
+  <footer>
+    <p style="font-size: 1.3em; margin-bottom: 15px;">¿Dudas o consultas? <a href="#contacto-modal" class="btn-footer-contact">Contáctanos</a></p>
     <p>&copy; 2025 La 27 Detailing. Todos los derechos reservados.</p>
   </footer>
 
-  <script>
-    // Combina fecha seleccionada + hora antes de enviar
-    document.getElementById("reserva-form").addEventListener("submit", function(e) {
-      const fecha = document.getElementById("fecha-display").value;
-      const hora = document.getElementById("hora").value;
+  <a href="https://wa.me/543644364703?text=Hola!%20Quiero%20consultar%20sobre%20los%20servicios%20de%20detailing" 
+     class="whatsapp-float" 
+     target="_blank"
+     title="Chatea con nosotros">
+    💬
+  </a>
 
-      if (!fecha || !hora) {
-        alert("⚠️ Debes elegir una fecha y una hora.");
-        e.preventDefault();
+  <script>
+    let currentStep = 1;
+    let selectedTimeSlot = null;
+
+    const workingHours = [
+      '08:00', '09:00', '10:00', '11:00', '12:00', 
+      '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+    ];
+
+    const occupiedSlots = {
+      '2025-10-10': ['09:00', '14:00', '16:00'],
+      '2025-10-15': ['10:00', '15:00'],
+      '2025-10-20': ['08:00', '12:00', '17:00']
+    };
+
+    function loadTimeSlots(selectedDate) {
+      const timeSlotsGrid = document.getElementById('time-slots-grid');
+      const timeSlotsWrapper = document.getElementById('time-slots-wrapper');
+      const noDateMessage = document.getElementById('no-date-message');
+      
+      timeSlotsGrid.innerHTML = '';
+      selectedTimeSlot = null;
+      
+      if (!selectedDate) {
+        timeSlotsWrapper.style.display = 'none';
+        noDateMessage.style.display = 'block';
         return;
       }
 
+      timeSlotsWrapper.style.display = 'block';
+      noDateMessage.style.display = 'none';
+
+      const occupied = occupiedSlots[selectedDate] || [];
+
+      workingHours.forEach(time => {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.textContent = time;
+        slot.dataset.time = time;
+
+        if (occupied.includes(time)) {
+          slot.classList.add('occupied');
+          slot.innerHTML = time + '<br><small>Ocupado</small>';
+        } else {
+          slot.addEventListener('click', function() {
+            selectTimeSlot(this);
+          });
+        }
+
+        timeSlotsGrid.appendChild(slot);
+      });
+    }
+
+    function selectTimeSlot(slotElement) {
+      if (slotElement.classList.contains('occupied')) {
+        return;
+      }
+
+      document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+
+      slotElement.classList.add('selected');
+      selectedTimeSlot = slotElement.dataset.time;
+      document.getElementById('hora').value = selectedTimeSlot;
+    }
+
+    function nextStep(step) {
+      if (!validateStep(currentStep)) {
+        return;
+      }
+
+      document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+
+      currentStep = step;
+      document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+      document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+      if (step === 4) {
+        updateSummary();
+      }
+
+      document.querySelector('.booking-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function prevStep(step) {
+      document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+
+      currentStep = step;
+      document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+      document.querySelector(`.step[data-step="${step}"]`).classList.remove('completed');
+      document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+      document.querySelector('.booking-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const fecha = document.getElementById('fecha-display').value;
+        const hora = document.getElementById('hora').value;
+        if (!fecha) {
+          alert('⚠️ Por favor, selecciona una fecha en el calendario.');
+          return false;
+        }
+        if (!hora || !selectedTimeSlot) {
+          alert('⚠️ Por favor, selecciona un horario disponible.');
+          return false;
+        }
+      } else if (step === 2) {
+        const servicio = document.getElementById('tipo-servicio').value;
+        if (!servicio) {
+          alert('⚠️ Por favor, selecciona un tipo de servicio.');
+          return false;
+        }
+      } else if (step === 3) {
+        const nombre = document.getElementById('nombre').value;
+        const telefono = document.getElementById('telefono').value;
+        if (!nombre) {
+          alert('⚠️ Por favor, ingresa tu nombre.');
+          return false;
+        }
+        if (!telefono) {
+          alert('⚠️ Por favor, ingresa tu teléfono.');
+          return false;
+        }
+        if (!/^[0-9]+$/.test(telefono)) {
+          alert('⚠️ El teléfono solo debe contener números.');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function updateSummary() {
+      const fecha = document.getElementById('fecha-display').value;
+      const hora = document.getElementById('hora').value;
+      const servicio = document.getElementById('tipo-servicio');
+      const servicioTexto = servicio.options[servicio.selectedIndex].text;
+      const detalles = document.getElementById('detalles-trabajo').value || 'No especificado';
+      const nombre = document.getElementById('nombre').value;
+      const telefono = document.getElementById('telefono').value;
+
+      document.getElementById('resumen-fecha').textContent = fecha;
+      document.getElementById('resumen-hora').textContent = hora;
+      document.getElementById('resumen-servicio').textContent = servicioTexto;
+      document.getElementById('resumen-detalles').textContent = detalles;
+      document.getElementById('resumen-nombre').textContent = nombre;
+      document.getElementById('resumen-telefono').textContent = telefono;
+    }
+
+    document.getElementById("reserva-form").addEventListener("submit", function(e) {
+      //e.preventDefault();
+      
+      const fecha = document.getElementById("fecha-display").value;
+      const hora = document.getElementById("hora").value;
+      const tipoServicio = document.getElementById("tipo-servicio").value;
+      const detallesTrabajo = document.getElementById("detalles-trabajo").value;
+      const nombre = document.getElementById("nombre").value;
+      const telefono = document.getElementById("telefono").value;
+
       document.getElementById("fecha-hidden").value = fecha + " " + hora + ":00";
+
+      alert(`✅ ¡Reserva confirmada!\n\nFecha: ${fecha}\nHora: ${hora}\nServicio: ${tipoServicio}\nNombre: ${nombre}\nTeléfono: ${telefono}\n\nDetalles: ${detallesTrabajo || 'No especificado'}\n\n¡Nos vemos pronto!`);
+      
+      //this.reset();
+      document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+      document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active', 'completed');
+      });
+      currentStep = 1;
+      selectedTimeSlot = null;
+      document.querySelector('.form-section[data-section="1"]').classList.add('active');
+      document.querySelector('.step[data-step="1"]').classList.add('active');
+      
+      document.getElementById('time-slots-wrapper').style.display = 'none';
+      document.getElementById('no-date-message').style.display = 'block';
+    });
+
+    document.querySelectorAll('.calendar-table td a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        //e.preventDefault();
+        const day = this.textContent.trim().split('\n')[0];
+        const selectedDate = `2025-10-${day.padStart(2, '0')}`;
+        document.getElementById('fecha-display').value = selectedDate;
+        
+        loadTimeSlots(selectedDate);
+        
+        document.getElementById('reserva').scrollIntoView({ behavior: 'smooth' });
+      });
     });
   </script>
+
+  <!-- ======== INICIO DE CSS ======== -->
+  <style>
+* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+    }
+
+    header {
+      background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #228B22;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(34, 139, 34, 0.15);
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-block img {
+      height: 70px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(34, 139, 34, 0.2));
+      transition: transform 0.3s ease;
+    }
+
+    .logo-block img:hover {
+      transform: scale(1.05);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      cursor: pointer;
+      border-radius: 50px;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.05em;
+      transition: all 0.4s ease;
+      box-shadow: 0 6px 20px rgba(34, 139, 34, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(34, 139, 34, 0.92), rgba(0, 100, 0, 0.92)), 
+                  url('logola27.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: white;
+      text-align: center;
+      padding: 120px 20px;
+      font-size: 3.5em;
+      font-weight: 900;
+      text-shadow: 4px 4px 12px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      letter-spacing: 3px;
+      animation: fadeInUp 1s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, #e8f5e9, transparent);
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 60px 40px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .service-button {
+      background: white;
+      color: #228B22;
+      font-weight: bold;
+      border: none;
+      padding: 40px 30px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-size: 1.3em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #228B22, #32CD32);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .service-button:hover::before {
+      transform: scaleX(1);
+    }
+
+    .service-button .icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      transition: transform 0.4s ease;
+    }
+
+    .service-button:hover .icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .service-button:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(34, 139, 34, 0.25);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .modal:target {
+      display: flex;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 50px;
+      border-radius: 25px;
+      max-width: 650px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    .modal:target .modal-content {
+      transform: scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      cursor: pointer;
+      font-size: 36px;
+      text-decoration: none;
+      color: #999;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-btn:hover {
+      color: #228B22;
+      background: #e8f5e9;
+      transform: rotate(90deg);
+    }
+
+    .modal-content h2 {
+      color: #228B22;
+      margin-bottom: 25px;
+      font-size: 2.2em;
+      border-bottom: 4px solid #228B22;
+      padding-bottom: 15px;
+    }
+
+    .modal-content p {
+      margin: 20px 0;
+      color: #555;
+      font-size: 1.15em;
+      line-height: 1.9;
+    }
+
+    .modal-content p strong {
+      color: #228B22;
+      font-size: 1.1em;
+    }
+
+    .calendar-container {
+      padding: 50px 30px;
+      max-width: 1000px;
+      margin: 50px auto;
+      border-radius: 30px;
+      background: white;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+    }
+
+    .calendar-container h3 {
+      color: #228B22;
+      margin-bottom: 40px;
+      font-size: 2.5em;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .calendar-nav {
+      text-align: center;
+      margin-bottom: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .calendar-nav a {
+      text-decoration: none;
+      color: #228B22;
+      font-weight: bold;
+      padding: 12px 24px;
+      border: 2px solid #228B22;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      font-size: 1.05em;
+    }
+
+    .calendar-nav a:hover {
+      background: #228B22;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .calendar-nav span {
+      font-weight: bold;
+      color: #228B22;
+      font-size: 1.4em;
+    }
+
+    .calendar-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+      margin-bottom: 50px;
+    }
+
+    .calendar-table th {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      padding: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 12px;
+      font-size: 1.05em;
+      letter-spacing: 1px;
+    }
+
+    .calendar-table td {
+      background: #f8f9fa;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      height: 100px;
+      vertical-align: top;
+      border: 2px solid transparent;
+    }
+
+    .calendar-table td:hover {
+      background: #dcfce7;
+      transform: scale(1.08);
+      box-shadow: 0 8px 20px rgba(34, 139, 34, 0.2);
+      border-color: #228B22;
+    }
+
+    .calendar-table td a {
+      display: block;
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+      height: 100%;
+      padding: 8px;
+      font-size: 1.2em;
+    }
+
+    .calendar-table td.today {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      border: 3px solid #FFD700;
+      box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4);
+    }
+
+    .calendar-table td.today a {
+      color: white;
+    }
+
+    .calendar-table td.has-reservation {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffc107;
+    }
+
+    .booking-form {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      padding: 50px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(34, 139, 34, 0.1);
+    }
+
+    .booking-form h3 {
+      text-align: center;
+      color: #228B22;
+      margin-bottom: 35px;
+      font-size: 2.2em;
+      font-weight: 800;
+    }
+
+    .steps-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 50px;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .steps-indicator::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 12%;
+      right: 12%;
+      height: 4px;
+      background: #d1d5db;
+      z-index: 0;
+      border-radius: 10px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 12px;
+      transition: all 0.4s ease;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .step.active .step-circle {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      transform: scale(1.3);
+      box-shadow: 0 6px 25px rgba(34, 139, 34, 0.5);
+    }
+
+    .step.completed .step-circle {
+      background: #228B22;
+      color: white;
+    }
+
+    .step.completed .step-circle::after {
+      content: '✓';
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .step.active .step-label {
+      color: #228B22;
+      font-size: 14px;
+    }
+
+    .step.completed .step-label {
+      color: #228B22;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #228B22;
+      font-weight: 700;
+      font-size: 1.15em;
+    }
+
+    .booking-form input[type="text"],
+    .booking-form input[type="tel"],
+    .booking-form input[type="time"],
+    .booking-form select,
+    .booking-form textarea {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 1.05em;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      background: white;
+    }
+
+    .booking-form input:focus,
+    .booking-form select:focus,
+    .booking-form textarea:focus {
+      outline: none;
+      border-color: #228B22;
+      box-shadow: 0 0 0 4px rgba(34, 139, 34, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .booking-form textarea {
+      resize: vertical;
+      min-height: 130px;
+    }
+
+    .form-navigation {
+      display: flex;
+      gap: 20px;
+      margin-top: 35px;
+    }
+
+    .form-navigation button {
+      flex: 1;
+      padding: 16px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.15em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .btn-prev {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-prev:hover {
+      background: #4b5563;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .time-slots-container {
+      margin-top: 25px;
+      padding: 30px;
+      background: white;
+      border-radius: 20px;
+      border: 3px solid #dcfce7;
+    }
+
+    .time-slots-container h4 {
+      color: #228B22;
+      margin-bottom: 20px;
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+
+    .time-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 15px;
+    }
+
+    .time-slot {
+      padding: 16px;
+      background: white;
+      border: 3px solid #228B22;
+      border-radius: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      color: #228B22;
+      transition: all 0.3s ease;
+      font-size: 1.1em;
+    }
+
+    .time-slot:hover {
+      background: #228B22;
+      color: white;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(34, 139, 34, 0.3);
+    }
+
+    .time-slot.selected {
+      background: #228B22;
+      color: white;
+      box-shadow: 0 8px 25px rgba(34, 139, 34, 0.5);
+      transform: scale(1.05);
+    }
+
+    .time-slot.occupied {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .time-slot.occupied:hover {
+      background: #f3f4f6;
+      color: #9ca3af;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .no-date-selected {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 30px;
+      font-size: 1.1em;
+    }
+
+    footer {
+      text-align: center;
+      padding: 50px;
+      background: linear-gradient(135deg, #1e7e34 0%, #228B22 100%);
+      color: white;
+      margin-top: 60px;
+    }
+
+    .btn-footer-contact {
+      background: white;
+      color: #228B22;
+      padding: 14px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin: 15px 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-footer-contact:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+    }
+
+    .contact-link {
+      color: #228B22;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    .contact-link:hover {
+      color: #32CD32;
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+      z-index: 1000;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .whatsapp-float:hover {
+      transform: scale(1.15);
+      box-shadow: 0 12px 35px rgba(37, 211, 102, 0.8);
+      animation: none;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .logo-block img {
+        height: 60px;
+      }
+      
+      .hero {
+        font-size: 2.2em;
+        padding: 80px 20px;
+      }
+      
+      .services {
+        grid-template-columns: 1fr;
+        padding: 30px 20px;
+      }
+      
+      .calendar-table th, .calendar-table td {
+        padding: 10px;
+        height: 75px;
+        font-size: 0.9em;
+      }
+      
+      .booking-form {
+        padding: 30px 20px;
+      }
+
+      .modal-content {
+        padding: 35px 25px;
+        width: 95%;
+      }
+
+      .form-navigation {
+        flex-direction: column;
+      }
+
+      .steps-indicator {
+        padding: 0 10px;
+      }
+
+      .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+
+      .step.active .step-circle {
+        transform: scale(1.15);
+      }
+
+      .step-label {
+        font-size: 11px;
+      }
+    }
+  </style>
+  <!-- ======== FIN DE CSS ======== -->
 
 </body>
 </html>
