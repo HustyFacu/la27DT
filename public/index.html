@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -10,7 +11,7 @@
 
   <header>
     <div class="logo-block">
-      <img src="logola27.png" alt="La 27 Detailing" />
+      <img src="{% static 'logola27.png' %}" alt="La 27 Detailing" />
     </div>
     <a href="#reserva" class="btn">🚗 RESERVA TU TURNO</a>
   </header>
@@ -119,7 +120,7 @@
         </div>
       </div>
       
-      <form id="reserva-form" method="POST" action="{% url 'calendar_view' %}">
+      <form id="reserva-form" method="POST" action="{% url 'reservas_app:calendar_view' %}">
       {% csrf_token %}
         <!-- Paso 1: Fecha y Hora -->
         <div class="form-section active" data-section="1">
@@ -164,14 +165,15 @@
             <label for="tipo-servicio">🚗 Tipo de servicio:</label>
             <select id="tipo-servicio" name="tipo_servicio" required>
               <option value="">Selecciona un servicio</option>
-              <option value="lavado-comun">Lavado Común</option>
-              <option value="lavado-premium">Lavado Premium</option>
-              <option value="abrillantado">Abrillantado</option>
-              <option value="correccion-pintura">Corrección de Pintura</option>
-              <option value="interior">Limpieza de Interior</option>
-              <option value="otro">Otro (especificar abajo)</option>
+              {% for trabajo in trabajos %}
+                <option value="{{ trabajo.id }}" data-precio="{{ trabajo.precio }}">
+                  {{ trabajo.tipo_trabajo }}
+                </option>
+              {% endfor %}
             </select>
           </div>
+
+          <p id="precio-servicio" style="margin-top:10px; font-weight:bold;"></p>
 
           <div class="form-group">
             <label for="detalles-trabajo">📝 Detalles del trabajo:</label>
@@ -261,6 +263,22 @@
       '2025-10-15': ['10:00', '15:00'],
       '2025-10-20': ['08:00', '12:00', '17:00']
     };
+
+    // Mostrar precio dinámicamente
+    document.addEventListener('DOMContentLoaded', function() {
+      const select = document.getElementById("tipo-servicio");
+      const precioText = document.getElementById("precio-servicio");
+
+      select.addEventListener("change", function() {
+        const precio = this.options[this.selectedIndex].dataset.precio;
+        
+        if (precio) {
+          precioText.textContent = `💰 Precio: $${precio}`;
+        } else {
+          precioText.textContent = "";
+        }
+      });
+    });
 
     function loadTimeSlots(selectedDate) {
       const timeSlotsGrid = document.getElementById('time-slots-grid');
@@ -401,36 +419,25 @@
     }
 
     document.getElementById("reserva-form").addEventListener("submit", function(e) {
-      //e.preventDefault();
-      
       const fecha = document.getElementById("fecha-display").value;
       const hora = document.getElementById("hora").value;
-      const tipoServicio = document.getElementById("tipo-servicio").value;
+      const tipoServicio = document.getElementById("tipo-servicio");
+      const servicioTexto = tipoServicio.options[tipoServicio.selectedIndex].text;
+      const precio = tipoServicio.options[tipoServicio.selectedIndex].dataset.precio;
       const detallesTrabajo = document.getElementById("detalles-trabajo").value;
       const nombre = document.getElementById("nombre").value;
       const telefono = document.getElementById("telefono").value;
+      const tipoVehiculo = document.getElementById("tipo-vehiculo");
+      const vehiculoTexto = tipoVehiculo.options[tipoVehiculo.selectedIndex].text;
 
       document.getElementById("fecha-hidden").value = fecha + " " + hora + ":00";
 
-      alert(`✅ ¡Reserva confirmada!\n\nFecha: ${fecha}\nHora: ${hora}\nServicio: ${tipoServicio}\nNombre: ${nombre}\nTeléfono: ${telefono}\n\nDetalles: ${detallesTrabajo || 'No especificado'}\n\n¡Nos vemos pronto!`);
-      
-      //this.reset();
-      document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
-      document.querySelectorAll('.step').forEach(step => {
-        step.classList.remove('active', 'completed');
-      });
-      currentStep = 1;
-      selectedTimeSlot = null;
-      document.querySelector('.form-section[data-section="1"]').classList.add('active');
-      document.querySelector('.step[data-step="1"]').classList.add('active');
-      
-      document.getElementById('time-slots-wrapper').style.display = 'none';
-      document.getElementById('no-date-message').style.display = 'block';
+      // Mostrar confirmación visual completa antes de enviar
+      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📅 Fecha: ${fecha}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     });
 
     document.querySelectorAll('.calendar-table td a').forEach(link => {
       link.addEventListener('click', function(e) {
-        //e.preventDefault();
         const day = this.textContent.trim().split('\n')[0];
         const selectedDate = `2025-10-${day.padStart(2, '0')}`;
         document.getElementById('fecha-display').value = selectedDate;
@@ -527,8 +534,7 @@
     }
 
     .hero {
-      background: linear-gradient(135deg, rgba(34, 139, 34, 0.92), rgba(0, 100, 0, 0.92)), 
-                  url('logola27.png');
+      background: linear-gradient(135deg, rgba(34, 139, 34, 0.92), rgba(0, 100, 0, 0.92));
       background-size: cover;
       background-position: center;
       background-attachment: fixed;

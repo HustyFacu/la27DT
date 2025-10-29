@@ -1,4 +1,3 @@
-# reservas_app/models.py
 from django.db import models
 
 class Cliente(models.Model):
@@ -28,14 +27,17 @@ class Vehiculo(models.Model):
         return f"{self.dominio or 'sin dominio'} ({self.tipo_vehiculo or 'vehículo'})"
 
 
-class Trabajos(models.Model):
-    descripcion_usuario = models.CharField(max_length=150)
-    tipo_trabajo = models.CharField(max_length=30)
-    duracion = models.IntegerField(blank=True, null=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
+class Trabajo(models.Model):
+    tipo_trabajo = models.CharField(max_length=100, verbose_name="Tipo de trabajo")
+    descripcion_usuario = models.TextField(blank=True, null=True, verbose_name="Detalles")
+    precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio ($)")
+
+    class Meta:
+        verbose_name = "Trabajo"
+        verbose_name_plural = "Trabajos"
 
     def __str__(self):
-        return f"{self.tipo_trabajo} - ${self.precio}"
+        return f"{self.tipo_trabajo} (${self.precio})"
 
 
 class Turnos(models.Model):
@@ -43,13 +45,12 @@ class Turnos(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='turnos')
 
     def __str__(self):
-        return f"Turno de {self.cliente.nombre} el {self.fecha_turno}"
+        return f"Turno de {self.cliente.nombre} el {self.fecha_turno.strftime('%d/%m/%Y %H:%M')}"
 
 
 class TrabajoVehiculo(models.Model):
     turno = models.ForeignKey(Turnos, on_delete=models.CASCADE)
-    trabajo = models.ForeignKey(Trabajos, on_delete=models.CASCADE)
-    fecha_turno = models.DateTimeField()
+    trabajo = models.ForeignKey(Trabajo, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.turno} - {self.trabajo}"

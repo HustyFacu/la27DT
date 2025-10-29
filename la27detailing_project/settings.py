@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -57,13 +56,15 @@ ROOT_URLCONF = 'la27detailing_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'public')], 
+        'DIRS': [os.path.join(BASE_DIR, 'public')],  # ✅ Templates en public/
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',  # ✅ Agregado para debugging
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',  # ✅ Agregado para {% static %}
             ],
         },
     },
@@ -75,16 +76,14 @@ WSGI_APPLICATION = 'la27detailing_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'la27dtl',         # Reemplaza con el nombre de tu DB si es diferente (generalmente 'postgres')
-        'USER': 'root',         # Reemplaza con tu usuario (generalmente 'postgres')
+        'NAME': 'la27dtl',
+        'USER': 'root',
         'PASSWORD': 'facundo99',
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        #'CONN_MAX_AGE': 600, # Opcional: Para mantener las conexiones de DB abiertas por más tiempo
     }
 }
 
@@ -111,12 +110,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'es-ar'  # ✅ Cambiado a español de Argentina
+TIME_ZONE = 'America/Argentina/Buenos_Aires'  # ✅ Zona horaria correcta
 
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -129,6 +126,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'public'),
 ]
+
+# Para producción (cuando ejecutes collectstatic)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 # Default primary key field type
@@ -144,13 +144,38 @@ JAZZMIN_SETTINGS = {
     "site_header": "Administración LA27",
     "site_brand": "LA27 Detailing",
     "welcome_sign": "Bienvenido al Panel de Administración",
-    "search_model": ["reservas_app.Reserva", "reservas_app.Trabajo"],
+    
+    # ✅ Modelos que SÍ existen en tu aplicación
+    "search_model": [
+        "reservas_app.Cliente",
+        "reservas_app.Turnos", 
+        "reservas_app.Trabajo",
+        "reservas_app.TrabajoVehiculo",
+    ],
+    
     "show_sidebar": True,
     "navigation_expanded": True,
+    
+    # ✅ Iconos para tus modelos reales
     "icons": {
-        "reservas_app.Reserva": "fas fa-calendar-check",
-        "reservas_app.Trabajo": "fas fa-car",
+        "reservas_app.Cliente": "fas fa-user",
+        "reservas_app.Vehiculo": "fas fa-car",
+        "reservas_app.Turnos": "fas fa-calendar-check",
+        "reservas_app.Trabajo": "fas fa-wrench",
+        "reservas_app.TrabajoVehiculo": "fas fa-clipboard-list",
+        "reservas_app.Marca": "fas fa-tag",
+        "auth.User": "fas fa-user-shield",
+        "auth.Group": "fas fa-users",
     },
+    
+    # ✅ Enlaces personalizados en el menú superior
+    "topmenu_links": [
+        {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Ver Calendario", "url": "/", "icon": "fas fa-calendar", "new_window": True},
+    ],
+    
+    # Desactiva el constructor de UI para evitar problemas
+    "show_ui_builder": False,
 }
 
 # (Opcional) 🎨 Ajustes de estilo visual
@@ -172,4 +197,3 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     },
 }
-
