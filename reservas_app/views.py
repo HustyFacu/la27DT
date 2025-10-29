@@ -4,6 +4,26 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime
 from .models import Cliente, Trabajos, Turnos, TrabajoVehiculo, Vehiculo
+from django.shortcuts import render, get_object_or_404
+from .models import Trabajos 
+
+
+def reservar(request):
+    trabajos = Trabajos.objects.all()
+    precio=0
+
+    if request.method == "POST":
+        trabajo_id = request.POST.get("tipo_servicio")
+        if trabajo_id:
+            trabajo = Trabajos.objects.get(id=trabajo_id)
+            precio = trabajos.precio
+
+    return render(request, "tu_template.html", {"trabajos": trabajos, "precio": precio})
+
+
+
+
+
 
 def calendar_view(request):
     if request.method == 'POST':

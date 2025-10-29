@@ -32,9 +32,10 @@ class Trabajos(models.Model):
     descripcion_usuario = models.CharField(max_length=150)
     tipo_trabajo = models.CharField(max_length=30)
     duracion = models.IntegerField(blank=True, null=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.tipo_trabajo} - {self.descripcion_usuario}"
+        return f"{self.tipo_trabajo} - ${self.precio}"
 
 
 class Turnos(models.Model):

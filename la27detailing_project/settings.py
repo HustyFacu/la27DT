@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,3 +135,41 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ==============================
+# 🎨 CONFIGURACIÓN DE JAZZMIN
+# ==============================
+JAZZMIN_SETTINGS = {
+    "site_title": "Panel LA27 Detailing",
+    "site_header": "Administración LA27",
+    "site_brand": "LA27 Detailing",
+    "welcome_sign": "Bienvenido al Panel de Administración",
+    "search_model": ["reservas_app.Reserva", "reservas_app.Trabajo"],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "reservas_app.Reserva": "fas fa-calendar-check",
+        "reservas_app.Trabajo": "fas fa-car",
+    },
+}
+
+# (Opcional) 🎨 Ajustes de estilo visual
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",  # Tema oscuro, ideal para LA27
+    "navbar": "navbar-dark navbar-primary",
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_flat_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_child_indent": True,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-lightblue",
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+}
+
