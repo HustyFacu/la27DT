@@ -68,9 +68,9 @@
     <h3>📅 Calendario de Turnos</h3>
 
     <div class="calendar-nav">
-      <a href="#">← Anterior</a>
-      <span>Octubre 2025</span>
-      <a href="#">Siguiente →</a>
+      <a href="#" id="prev-week">← Semana Anterior</a>
+      <span id="week-range">Octubre 2025</span>
+      <a href="#" id="next-week">Siguiente Semana →</a>
     </div>
 
     <table class="calendar-table">
@@ -79,22 +79,7 @@
           <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td></td><td></td><td><a href="#">1</a></td><td><a href="#">2</a></td><td><a href="#">3</a></td><td><a href="#">4</a></td><td><a href="#">5</a></td>
-        </tr>
-        <tr>
-          <td><a href="#">6</a></td><td class="today"><a href="#">7</a></td><td><a href="#">8</a></td><td><a href="#">9</a></td><td class="has-reservation"><a href="#">10<br><small>Reservado</small></a></td><td><a href="#">11</a></td><td><a href="#">12</a></td>
-        </tr>
-        <tr>
-          <td><a href="#">13</a></td><td><a href="#">14</a></td><td><a href="#">15</a></td><td><a href="#">16</a></td><td><a href="#">17</a></td><td><a href="#">18</a></td><td><a href="#">19</a></td>
-        </tr>
-        <tr>
-          <td><a href="#">20</a></td><td><a href="#">21</a></td><td><a href="#">22</a></td><td><a href="#">23</a></td><td><a href="#">24</a></td><td><a href="#">25</a></td><td><a href="#">26</a></td>
-        </tr>
-        <tr>
-          <td><a href="#">27</a></td><td><a href="#">28</a></td><td><a href="#">29</a></td><td><a href="#">30</a></td><td><a href="#">31</a></td><td></td><td></td>
-        </tr>
+      <tbody id="calendar-body">
       </tbody>
     </table>
 
@@ -252,6 +237,7 @@
   <script>
     let currentStep = 1;
     let selectedTimeSlot = null;
+    let currentWeekStart = new Date(2025, 9, 27);
 
     const workingHours = [
       '08:00', '09:00', '10:00', '11:00', '12:00', 
@@ -261,11 +247,99 @@
     const occupiedSlots = {
       '2025-10-10': ['09:00', '14:00', '16:00'],
       '2025-10-15': ['10:00', '15:00'],
-      '2025-10-20': ['08:00', '12:00', '17:00']
+      '2025-10-20': ['08:00', '12:00', '17:00'],
+      '2025-10-30': ['09:00', '15:00']
     };
 
-    // Mostrar precio dinámicamente
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(date.setDate(diff));
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateReadable(date) {
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      return `${date.getDate()} de ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    function generateWeekCalendar() {
+      const calendarBody = document.getElementById('calendar-body');
+      const weekRange = document.getElementById('week-range');
+      
+      calendarBody.innerHTML = '';
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const weekStart = new Date(currentWeekStart);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      if (weekStart.getMonth() === weekEnd.getMonth()) {
+        weekRange.textContent = `${weekStart.getDate()} - ${weekEnd.getDate()} de ${months[weekStart.getMonth()]} ${weekStart.getFullYear()}`;
+      } else {
+        weekRange.textContent = `${weekStart.getDate()} ${months[weekStart.getMonth()]} - ${weekEnd.getDate()} ${months[weekEnd.getMonth()]} ${weekStart.getFullYear()}`;
+      }
+      
+      const row = document.createElement('tr');
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(currentDate.getDate() + i);
+        
+        const td = document.createElement('td');
+        const dateStr = formatDate(currentDate);
+        
+        if (currentDate.getTime() === today.getTime()) {
+          td.classList.add('today');
+        }
+        
+        if (occupiedSlots[dateStr]) {
+          td.classList.add('has-reservation');
+        }
+        
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = currentDate.getDate();
+        link.dataset.date = dateStr;
+        
+        if (occupiedSlots[dateStr]) {
+          link.innerHTML = `${currentDate.getDate()}<br><small>Reservado</small>`;
+        }
+        
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const selectedDate = this.dataset.date;
+          document.getElementById('fecha-display').value = formatDateReadable(currentDate);
+          document.getElementById('fecha-display').dataset.dateIso = selectedDate;
+          
+          loadTimeSlots(selectedDate);
+          
+          document.getElementById('reserva').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        td.appendChild(link);
+        row.appendChild(td);
+      }
+      
+      calendarBody.appendChild(row);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+      currentWeekStart = getMonday(new Date());
+      generateWeekCalendar();
+      
       const select = document.getElementById("tipo-servicio");
       const precioText = document.getElementById("precio-servicio");
 
@@ -278,6 +352,18 @@
           precioText.textContent = "";
         }
       });
+    });
+
+    document.getElementById('prev-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+      generateWeekCalendar();
+    });
+
+    document.getElementById('next-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      generateWeekCalendar();
     });
 
     function loadTimeSlots(selectedDate) {
@@ -419,7 +505,8 @@
     }
 
     document.getElementById("reserva-form").addEventListener("submit", function(e) {
-      const fecha = document.getElementById("fecha-display").value;
+      const fechaDisplay = document.getElementById("fecha-display");
+      const fechaIso = fechaDisplay.dataset.dateIso;
       const hora = document.getElementById("hora").value;
       const tipoServicio = document.getElementById("tipo-servicio");
       const servicioTexto = tipoServicio.options[tipoServicio.selectedIndex].text;
@@ -430,26 +517,12 @@
       const tipoVehiculo = document.getElementById("tipo-vehiculo");
       const vehiculoTexto = tipoVehiculo.options[tipoVehiculo.selectedIndex].text;
 
-      document.getElementById("fecha-hidden").value = fecha + " " + hora + ":00";
+      document.getElementById("fecha-hidden").value = fechaIso + " " + hora + ":00";
 
-      // Mostrar confirmación visual completa antes de enviar
-      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📅 Fecha: ${fecha}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    });
-
-    document.querySelectorAll('.calendar-table td a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        const day = this.textContent.trim().split('\n')[0];
-        const selectedDate = `2025-10-${day.padStart(2, '0')}`;
-        document.getElementById('fecha-display').value = selectedDate;
-        
-        loadTimeSlots(selectedDate);
-        
-        document.getElementById('reserva').scrollIntoView({ behavior: 'smooth' });
-      });
+      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     });
   </script>
 
-  <!-- ======== INICIO DE CSS ======== -->
   <style>
 * {
       margin: 0;
@@ -1263,7 +1336,6 @@
       }
     }
   </style>
-  <!-- ======== FIN DE CSS ======== -->
 
 </body>
 </html>
