@@ -10,11 +10,63 @@
 <body>
 
   <header>
+    
     <div class="logo-block">
       <img src="{% static 'logola27.png' %}" alt="La 27 Detailing" />
     </div>
-    <a href="#reserva" class="btn">🚗 RESERVA TU TURNO</a>
+    <div class="header-buttons">
+      <a href="#modal-gestionar" class="btn btn-gestionar">📋 GESTIONAR TURNO</a>
+      <a href="#reserva" class="btn">🚗 RESERVA TU TURNO</a>
+    </div>
   </header>
+ {% if messages %}
+  <div style="position: fixed; top: 100px; right: 20px; z-index: 9999; max-width: 400px;">
+    {% for message in messages %}
+    <div class="message-alert" style="background: {% if message.tags == 'success' %}#dcfce7{% else %}#fee2e2{% endif %}; 
+                color: {% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %}; 
+                padding: 20px; 
+                border-radius: 15px; 
+                margin-bottom: 10px; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                border: 3px solid {% if message.tags == 'success' %}#228B22{% else %}#dc2626{% endif %};
+                position: relative;">
+      
+      <!-- Botón de cerrar -->
+      <button onclick="this.parentElement.remove()" 
+              style="position: absolute; 
+                     top: 10px; 
+                     right: 10px; 
+                     background: transparent; 
+                     border: none; 
+                     font-size: 24px; 
+                     font-weight: bold; 
+                     cursor: pointer; 
+                     color: {% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %};
+                     width: 30px;
+                     height: 30px;
+                     display: flex;
+                     align-items: center;
+                     justify-content: center;
+                     border-radius: 5px;
+                     transition: all 0.2s;">
+        ×
+      </button>
+      
+      <!-- Mensaje con padding derecho para no chocar con la X -->
+      <div style="padding-right: 30px;">
+        {{ message }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <style>
+    .message-alert button:hover {
+      background: rgba(0,0,0,0.1) !important;
+      transform: scale(1.1);
+    }
+  </style>
+{% endif %}
 
   <section class="hero">
     <div class="hero-content">
@@ -61,6 +113,40 @@
       <a href="#" class="close-btn">&times;</a>
       <h2>🪑 Servicio de Interior</h2>
       <p>Aspirado profundo, limpieza de tapizados, paneles, consola y tratamiento de plásticos para dejar tu interior como nuevo.</p>
+    </div>
+  </div>
+
+  <div id="modal-gestionar" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>📋 Gestionar Tu Turno</h2>
+      <p style="margin-bottom: 30px;">Ingresa el código único que recibiste al realizar tu reserva para ver, modificar o cancelar tu turno.</p>
+      
+      <form id="form-codigo-turno" onsubmit="verificarCodigoTurno(event)">
+        <div class="form-group">
+          <label for="codigo-turno">🔑 Código de Reserva:</label>
+          <input type="text" id="codigo-turno" placeholder="Ejemplo: LA27-ABC123" required style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em; text-transform: uppercase;" />
+        </div>
+        <button type="submit" class="btn-submit" style="width: 100%; margin-top: 20px;">Buscar Mi Turno</button>
+      </form>
+
+      <div id="turno-info" style="display: none; margin-top: 30px;">
+        <div style="background: #f0fdf4; padding: 25px; border-radius: 15px; border: 2px solid #228B22;">
+          <h3 style="color: #228B22; margin-bottom: 20px;">✅ Información de tu Turno</h3>
+          <p><strong>Código:</strong> <span id="info-codigo">-</span></p>
+          <p><strong>Fecha:</strong> <span id="info-fecha">-</span></p>
+          <p><strong>Hora:</strong> <span id="info-hora">-</span></p>
+          <p><strong>Servicio:</strong> <span id="info-servicio">-</span></p>
+          <p><strong>Vehículo:</strong> <span id="info-vehiculo">-</span></p>
+          <p><strong>Cliente:</strong> <span id="info-nombre">-</span></p>
+          <p><strong>Teléfono:</strong> <span id="info-telefono">-</span></p>
+          
+          <div style="display: flex; gap: 15px; margin-top: 25px;">
+            <button onclick="modificarTurno()" class="btn-prev" style="flex: 1;">✏️ Modificar</button>
+            <button onclick="cancelarTurno()" class="btn-submit" style="flex: 1; background: #dc2626;">❌ Cancelar</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -250,6 +336,96 @@
       '2025-10-20': ['08:00', '12:00', '17:00'],
       '2025-10-30': ['09:00', '15:00']
     };
+
+    function generarCodigoUnico() {
+      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const numeros = '0123456789';
+      let codigo = 'LA27-';
+      
+      for (let i = 0; i < 3; i++) {
+        codigo += letras.charAt(Math.floor(Math.random() * letras.length));
+      }
+      for (let i = 0; i < 3; i++) {
+        codigo += numeros.charAt(Math.floor(Math.random() * numeros.length));
+      }
+      
+      return codigo;
+    }
+
+    function verificarCodigoTurno(event) {
+      event.preventDefault();
+      const codigo = document.getElementById('codigo-turno').value.toUpperCase().trim();
+      
+      // Validar formato
+      if (!codigo.match(/^LA27-[A-Z]{3}[0-9]{3}$/)) {
+        alert('❌ Código inválido. Por favor verifica tu código de reserva.\n\nEl formato debe ser: LA27-ABC123');
+        return;
+      }
+      
+      // Hacer petición al backend
+      fetch(`/buscar-turno/?codigo=${encodeURIComponent(codigo)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Mostrar los datos del turno
+            document.getElementById('info-codigo').textContent = data.turno.codigo;
+            document.getElementById('info-fecha').textContent = data.turno.fecha;
+            document.getElementById('info-hora').textContent = data.turno.hora;
+            document.getElementById('info-servicio').textContent = data.turno.servicio + ' ($' + data.turno.precio + ')';
+            document.getElementById('info-vehiculo').textContent = data.turno.vehiculo;
+            document.getElementById('info-nombre').textContent = data.turno.nombre;
+            document.getElementById('info-telefono').textContent = data.turno.telefono;
+            
+            // Guardar el código para usar en cancelar
+            document.getElementById('turno-info').dataset.codigo = data.turno.codigo;
+            
+            document.getElementById('turno-info').style.display = 'block';
+          } else {
+            alert('❌ ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('❌ Error al buscar el turno. Por favor intenta nuevamente.');
+        });
+    }
+
+    function modificarTurno() {
+      alert('🔄 Función de modificación en desarrollo.\n\nPara modificar tu turno, por favor contáctanos por WhatsApp o teléfono.');
+    }
+
+    function cancelarTurno() {
+      const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
+      if (!confirmar) return;
+      
+      const codigo = document.getElementById('turno-info').dataset.codigo;
+      
+      // Obtener el token CSRF
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      fetch('/cancelar-turno/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrftoken
+        },
+        body: `codigo=${encodeURIComponent(codigo)}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
+          document.getElementById('turno-info').style.display = 'none';
+          document.getElementById('codigo-turno').value = '';
+        } else {
+          alert('❌ ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
+      });
+    }
 
     function getMonday(d) {
       const date = new Date(d);
@@ -517,11 +693,13 @@
       const tipoVehiculo = document.getElementById("tipo-vehiculo");
       const vehiculoTexto = tipoVehiculo.options[tipoVehiculo.selectedIndex].text;
 
+      const codigoUnico = generarCodigoUnico();
+
       document.getElementById("fecha-hidden").value = fechaIso + " " + hora + ":00";
 
-      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔑 ⚠️ IMPORTANTE: Guarda este código para gestionar tu turno\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     });
-  </script>
+</script>
 
   <style>
 * {
@@ -548,6 +726,16 @@
       top: 0;
       z-index: 999;
       box-shadow: 0 4px 20px rgba(34, 139, 34, 0.15);
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .btn-gestionar {
+      background: linear-gradient(135deg, #1e7e34 0%, #228B22 100%);
     }
 
     .logo-block {
@@ -584,6 +772,7 @@
       box-shadow: 0 6px 20px rgba(34, 139, 34, 0.3);
       position: relative;
       overflow: hidden;
+      white-space: nowrap;
     }
 
     .btn::before {
@@ -766,6 +955,8 @@
       transform: scale(0.8);
       transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .modal:target .modal-content {
@@ -814,6 +1005,11 @@
     .modal-content p strong {
       color: #228B22;
       font-size: 1.1em;
+    }
+
+    #turno-info p {
+      margin: 10px 0;
+      font-size: 1.05em;
     }
 
     .calendar-container {
@@ -1282,6 +1478,16 @@
         padding: 15px 20px;
         flex-direction: column;
         gap: 15px;
+      }
+
+      .header-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+      }
+
+      .header-buttons .btn {
+        width: 100%;
       }
 
       .logo-block img {

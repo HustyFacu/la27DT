@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'la27detailing_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'la27dtl',
+        'NAME': 'detailing27',
         'USER': 'root',
         'PASSWORD': 'facundo99',
         'HOST': '127.0.0.1',

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from .models import Cliente, Trabajo, Turnos, TrabajoVehiculo, Vehiculo
 
 
@@ -90,7 +92,7 @@ def index(request):
             print(f"✅ TrabajoVehiculo creado: {trabajo_vehiculo}")
             print("=" * 50)
 
-            messages.success(request, f'✅ ¡Reserva confirmada para {nombre}! Fecha: {fecha_dt.strftime("%d/%m/%Y %H:%M")}')
+            messages.success(request, f'✅ ¡Reserva confirmada! Tu código es: {turno.codigo_unico}')
             return redirect('reservas_app:calendar_view')
 
         except ValueError as e:
@@ -105,3 +107,105 @@ def index(request):
     # GET: Mostrar formulario con lista de trabajos
     trabajos = Trabajo.objects.all()
     return render(request, 'index.html', {'trabajos': trabajos})
+
+
+@require_http_methods(["GET"])
+def buscar_turno(request):
+    """
+    Vista para buscar un turno por código único.
+    Retorna los datos del turno en formato JSON.
+    """
+    codigo = request.GET.get('codigo', '').strip().upper()
+    
+    if not codigo:
+        return JsonResponse({
+            'success': False,
+            'error': 'Código no proporcionado'
+        }, status=400)
+    
+    try:
+        # Buscar el turno por código único
+        turno = Turnos.objects.select_related('cliente').prefetch_related('trabajos_vehiculo__trabajo').get(
+            codigo_unico=codigo
+        )
+        
+        # Obtener el primer trabajo relacionado (asumiendo que hay al menos uno)
+        trabajo_vehiculo = turno.trabajos_vehiculo.first()
+        
+        if not trabajo_vehiculo:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se encontró información del servicio para este turno'
+            }, status=404)
+        
+        # Obtener el vehículo del cliente para este turno
+        vehiculo = turno.cliente.vehiculos.first()
+        tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else 'No especificado'
+        
+        # Preparar los datos para enviar
+        data = {
+            'success': True,
+            'turno': {
+                'codigo': turno.codigo_unico,
+                'fecha': turno.fecha_turno.strftime('%d de %B %Y'),
+                'hora': turno.fecha_turno.strftime('%H:%M'),
+                'servicio': trabajo_vehiculo.trabajo.tipo_trabajo,
+                'precio': str(trabajo_vehiculo.trabajo.precio),
+                'detalles': trabajo_vehiculo.trabajo.descripcion_usuario or 'Sin detalles especificados',
+                'vehiculo': tipo_vehiculo,
+                'nombre': turno.cliente.nombre,
+                'telefono': turno.cliente.telefono,
+                'turno_id': turno.id
+            }
+        }
+        
+        return JsonResponse(data)
+        
+    except Turnos.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'No se encontró ningún turno con ese código'
+        }, status=404)
+    except Exception as e:
+        print(f"ERROR en buscar_turno: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': 'Error al buscar el turno'
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def cancelar_turno(request):
+    """
+    Vista para cancelar un turno existente.
+    """
+    codigo = request.POST.get('codigo', '').strip().upper()
+    
+    if not codigo:
+        return JsonResponse({
+            'success': False,
+            'error': 'Código no proporcionado'
+        }, status=400)
+    
+    try:
+        turno = Turnos.objects.get(codigo_unico=codigo)
+        turno.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Turno cancelado exitosamente'
+        })
+        
+    except Turnos.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'No se encontró ningún turno con ese código'
+        }, status=404)
+    except Exception as e:
+        print(f"ERROR en cancelar_turno: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error al cancelar el turno'
+        }, status=500)
