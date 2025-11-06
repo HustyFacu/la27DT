@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>La 27 Detailing</title>
+  
+</head>
+<body>
+
+  <header>
+    
+    <div class="logo-block">
+      <img src="{% static 'logola27.png' %}" alt="La 27 Detailing" />
+    </div>
+    <div class="header-buttons">
+      <a href="#modal-gestionar" class="btn btn-gestionar">📋 GESTIONAR TURNO</a>
+      <a href="#reserva" class="btn">🚗 RESERVA TU TURNO</a>
+    </div>
+  </header>
+ {% if messages %}
+  <div style="position: fixed; top: 100px; right: 20px; z-index: 9999; max-width: 400px;">
+    {% for message in messages %}
+    <div class="message-alert" style="background: {% if message.tags == 'success' %}#dcfce7{% else %}#fee2e2{% endif %}; 
+                color: {% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %}; 
+                padding: 20px; 
+                border-radius: 15px; 
+                margin-bottom: 10px; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                border: 3px solid {% if message.tags == 'success' %}#228B22{% else %}#dc2626{% endif %};
+                position: relative;">
+      
+      <!-- Botón de cerrar -->
+      <button onclick="this.parentElement.remove()" 
+              style="position: absolute; 
+                     top: 10px; 
+                     right: 10px; 
+                     background: transparent; 
+                     border: none; 
+                     font-size: 24px; 
+                     font-weight: bold; 
+                     cursor: pointer; 
+                     color: {% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %};
+                     width: 30px;
+                     height: 30px;
+                     display: flex;
+                     align-items: center;
+                     justify-content: center;
+                     border-radius: 5px;
+                     transition: all 0.2s;">
+        ×
+      </button>
+      
+      <!-- Mensaje con padding derecho para no chocar con la X -->
+      <div style="padding-right: 30px;">
+        {{ message }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <style>
+    .message-alert button:hover {
+      background: rgba(0,0,0,0.1) !important;
+      transform: scale(1.1);
+    }
+  </style>
+{% endif %}
+
+  <section class="hero">
+    <div class="hero-content">
+      ESTÉTICA VEHICULAR
+    </div>
+  </section>
+
+  <section class="services">
+    <a href="#modal-lavado" class="service-button">
+      <span class="icon">🧼</span>
+      LAVADO
+    </a>
+    <a href="#modal-tratamientos" class="service-button">
+      <span class="icon">✨</span>
+      TRATAMIENTOS
+    </a>
+    <a href="#modal-interior" class="service-button">
+      <span class="icon">🪑</span>
+      INTERIOR
+    </a>
+  </section>
+
+  <div id="modal-lavado" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>🧼 Servicio de Lavado</h2>
+      <p><strong>Lavado común:</strong> Limpieza exterior rápida, interior, llantas y vidrios.</p>
+      <p><strong>Lavado premium:</strong> Lavado a mano, encerado, interior, llantas a fondo y secado con microfibra.</p>
+    </div>
+  </div>
+
+  <div id="modal-tratamientos" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>✨ Tratamientos</h2>
+      <p><strong>Abrillantado:</strong> Restauración del brillo original de la pintura.</p>
+      <p><strong>Corrección de pintura en 2 pasos:</strong> Eliminación de imperfecciones y pulido profesional.</p>
+      <p><strong>Tratamientos especiales:</strong> Protección cerámica y sellado de pintura.</p>
+    </div>
+  </div>
+
+  <div id="modal-interior" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>🪑 Servicio de Interior</h2>
+      <p>Aspirado profundo, limpieza de tapizados, paneles, consola y tratamiento de plásticos para dejar tu interior como nuevo.</p>
+    </div>
+  </div>
+
+  <div id="modal-gestionar" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>📋 Gestionar Tu Turno</h2>
+      <p style="margin-bottom: 30px;">Ingresa el código único que recibiste al realizar tu reserva para ver, modificar o cancelar tu turno.</p>
+      
+      <form id="form-codigo-turno" onsubmit="verificarCodigoTurno(event)">
+        <div class="form-group">
+          <label for="codigo-turno">🔑 Código de Reserva:</label>
+          <input type="text" id="codigo-turno" placeholder="Ejemplo: LA27-ABC123" required style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em; text-transform: uppercase;" />
+        </div>
+        <button type="submit" class="btn-submit" style="width: 100%; margin-top: 20px;">Buscar Mi Turno</button>
+      </form>
+
+      <div id="turno-info" style="display: none; margin-top: 30px;">
+        <div style="background: #f0fdf4; padding: 25px; border-radius: 15px; border: 2px solid #228B22;">
+          <h3 style="color: #228B22; margin-bottom: 20px;">✅ Información de tu Turno</h3>
+          <p><strong>Código:</strong> <span id="info-codigo">-</span></p>
+          <p><strong>Fecha:</strong> <span id="info-fecha">-</span></p>
+          <p><strong>Hora:</strong> <span id="info-hora">-</span></p>
+          <p><strong>Servicio:</strong> <span id="info-servicio">-</span></p>
+          <p><strong>Vehículo:</strong> <span id="info-vehiculo">-</span></p>
+          <p><strong>Cliente:</strong> <span id="info-nombre">-</span></p>
+          <p><strong>Teléfono:</strong> <span id="info-telefono">-</span></p>
+          
+          <div style="display: flex; gap: 15px; margin-top: 25px;">
+            <button onclick="modificarTurno()" class="btn-prev" style="flex: 1;">✏️ Modificar</button>
+            <button onclick="cancelarTurno()" class="btn-submit" style="flex: 1; background: #dc2626;">❌ Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calendar-container" id="reserva">
+    <h3>📅 Calendario de Turnos</h3>
+
+    <div class="calendar-nav">
+      <a href="#" id="prev-week">← Semana Anterior</a>
+      <span id="week-range">Octubre 2025</span>
+      <a href="#" id="next-week">Siguiente Semana →</a>
+    </div>
+
+    <table class="calendar-table">
+      <thead>
+        <tr>
+          <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
+        </tr>
+      </thead>
+      <tbody id="calendar-body">
+      </tbody>
+    </table>
+
+    <div class="booking-form">
+      <h3>✅ Reservar Turno</h3>
+      
+      <div class="steps-indicator">
+        <div class="step active" data-step="1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Fecha y Hora</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Servicio</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Tus Datos</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-circle">4</div>
+          <div class="step-label">Confirmar</div>
+        </div>
+      </div>
+      
+      <form id="reserva-form" method="POST" action="{% url 'reservas_app:calendar_view' %}">
+      {% csrf_token %}
+        <!-- Paso 1: Fecha y Hora -->
+        <div class="form-section active" data-section="1">
+          <div class="form-group">
+            <label for="fecha-display">📅 Fecha seleccionada:</label>
+            <input type="text" id="fecha-display" name="fecha_display" readonly placeholder="Selecciona una fecha en el calendario" required />
+          </div>
+
+          <div id="time-slots-wrapper" style="display: none;">
+            <div class="time-slots-container">
+              <h4>🕐 Selecciona un horario disponible:</h4>
+              <div class="time-slots-grid" id="time-slots-grid">
+              </div>
+            </div>
+          </div>
+
+          <div id="no-date-message" class="no-date-selected">
+            👆 Selecciona primero una fecha en el calendario para ver los horarios disponibles
+          </div>
+
+          <div class="form-group" style="display: none;" id="hora-group">
+            <input type="time" id="hora" name="hora" readonly style="display: none;" />
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn-next" onclick="nextStep(2)" id="btn-step1-next">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 2: Servicio -->
+        <div class="form-section" data-section="2">
+          <div class="form-group">
+            <label for="tipo-vehiculo">🚙 Tipo de vehículo:</label>
+            <select id="tipo-vehiculo" name="tipo_vehiculo" required>
+              <option value="">Selecciona el tipo de vehículo</option>
+              <option value="auto">Auto</option>
+              <option value="camioneta">Camioneta</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="tipo-servicio">🚗 Tipo de servicio:</label>
+            <select id="tipo-servicio" name="tipo_servicio" required>
+              <option value="">Selecciona un servicio</option>
+              {% for trabajo in trabajos %}
+                <option value="{{ trabajo.id }}" data-precio="{{ trabajo.precio }}">
+                  {{ trabajo.tipo_trabajo }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <p id="precio-servicio" style="margin-top:10px; font-weight:bold;"></p>
+
+          <div class="form-group">
+            <label for="detalles-trabajo">📝 Detalles del trabajo:</label>
+            <textarea id="detalles-trabajo" name="detalles_trabajo" placeholder="Describe el trabajo que deseas realizar en tu vehículo..."></textarea>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(1)">← Anterior</button>
+            <button type="button" class="btn-next" onclick="nextStep(3)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 3: Datos personales -->
+        <div class="form-section" data-section="3">
+          <div class="form-group">
+            <label for="nombre">👤 Tu nombre:</label>
+            <input type="text" id="nombre" name="nombre" maxlength ="40" placeholder="Nombre completo" required/>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">📱 Tu teléfono:</label>
+            <input type="tel" id="telefono" name="telefono" maxlength="13" placeholder="Número de contacto" required pattern="[0-9]+" inputmode="numeric" />
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(2)">← Anterior</button>
+            <button type="button" class="btn-next" onclick="nextStep(4)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- Paso 4: Confirmación -->
+        <div class="form-section" data-section="4">
+          <div style="background: white; padding: 30px; border-radius: 20px; margin-bottom: 25px; border: 3px solid #dcfce7;">
+            <h4 style="margin-top: 0; color: #228B22; font-size: 1.5em;">📋 Resumen de tu reserva:</h4>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Fecha:</strong> <span id="resumen-fecha">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Hora:</strong> <span id="resumen-hora">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Servicio:</strong> <span id="resumen-servicio">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Detalles:</strong> <span id="resumen-detalles">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Nombre:</strong> <span id="resumen-nombre">-</span></p>
+            <p style="margin: 12px 0; font-size: 1.1em;"><strong>Teléfono:</strong> <span id="resumen-telefono">-</span></p>
+          </div>
+
+          <input type="hidden" name="fecha" id="fecha-hidden" />
+
+          <div class="form-navigation">
+            <button type="button" class="btn-prev" onclick="prevStep(3)">← Anterior</button>
+            <button type="submit" class="btn-submit">Confirmar Reserva ✓</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="contacto-modal" class="modal">
+    <div class="modal-content">
+      <a href="#" class="close-btn">&times;</a>
+      <h2>📞 Información de Contacto</h2>
+      <p><strong>Teléfono:</strong> <a href="tel:+543644364703" class="contact-link">3644-364703</a></p>
+      <p><strong>WhatsApp:</strong> <a href="https://wa.me/543644364703" target="_blank" class="contact-link">Abrir chat en WhatsApp</a></p>
+      <p><strong>Instagram:</strong> <a href="https://www.instagram.com/la27detailing/" target="_blank" class="contact-link">@la27detailing</a></p>
+    </div>
+  </div>
+
+  <footer>
+    <p style="font-size: 1.3em; margin-bottom: 15px;">¿Dudas o consultas? <a href="#contacto-modal" class="btn-footer-contact">Contáctanos</a></p>
+    <p>&copy; 2025 La 27 Detailing. Todos los derechos reservados.</p>
+  </footer>
+
+  <a href="https://wa.me/543644364703?text=Hola!%20Quiero%20consultar%20sobre%20los%20servicios%20de%20detailing" 
+     class="whatsapp-float" 
+     target="_blank"
+     title="Chatea con nosotros">
+    💬
+  </a>
+
+  <script>
+    let currentStep = 1;
+    let selectedTimeSlot = null;
+    let currentWeekStart = new Date(2025, 9, 27);
+
+    const workingHours = [
+      '08:00', '09:00', '10:00', '11:00', '12:00', 
+      '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+    ];
+
+    const occupiedSlots = {
+      '2025-10-10': ['09:00', '14:00', '16:00'],
+      '2025-10-15': ['10:00', '15:00'],
+      '2025-10-20': ['08:00', '12:00', '17:00'],
+      '2025-10-30': ['09:00', '15:00']
+    };
+
+    function generarCodigoUnico() {
+      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const numeros = '0123456789';
+      let codigo = 'LA27-';
+      
+      for (let i = 0; i < 3; i++) {
+        codigo += letras.charAt(Math.floor(Math.random() * letras.length));
+      }
+      for (let i = 0; i < 3; i++) {
+        codigo += numeros.charAt(Math.floor(Math.random() * numeros.length));
+      }
+      
+      return codigo;
+    }
+
+    function verificarCodigoTurno(event) {
+      event.preventDefault();
+      const codigo = document.getElementById('codigo-turno').value.toUpperCase().trim();
+      
+      // Validar formato
+      if (!codigo.match(/^LA27-[A-Z]{3}[0-9]{3}$/)) {
+        alert('❌ Código inválido. Por favor verifica tu código de reserva.\n\nEl formato debe ser: LA27-ABC123');
+        return;
+      }
+      
+      // Hacer petición al backend
+      fetch(`/buscar-turno/?codigo=${encodeURIComponent(codigo)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Mostrar los datos del turno
+            document.getElementById('info-codigo').textContent = data.turno.codigo;
+            document.getElementById('info-fecha').textContent = data.turno.fecha;
+            document.getElementById('info-hora').textContent = data.turno.hora;
+            document.getElementById('info-servicio').textContent = data.turno.servicio + ' ($' + data.turno.precio + ')';
+            document.getElementById('info-vehiculo').textContent = data.turno.vehiculo;
+            document.getElementById('info-nombre').textContent = data.turno.nombre;
+            document.getElementById('info-telefono').textContent = data.turno.telefono;
+            
+            // Guardar el código para usar en cancelar
+            document.getElementById('turno-info').dataset.codigo = data.turno.codigo;
+            
+            document.getElementById('turno-info').style.display = 'block';
+          } else {
+            alert('❌ ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('❌ Error al buscar el turno. Por favor intenta nuevamente.');
+        });
+    }
+
+    function modificarTurno() {
+      alert('🔄 Función de modificación en desarrollo.\n\nPara modificar tu turno, por favor contáctanos por WhatsApp o teléfono.');
+    }
+
+    function cancelarTurno() {
+      const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
+      if (!confirmar) return;
+      
+      const codigo = document.getElementById('turno-info').dataset.codigo;
+      
+      // Obtener el token CSRF
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      fetch('/cancelar-turno/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrftoken
+        },
+        body: `codigo=${encodeURIComponent(codigo)}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
+          document.getElementById('turno-info').style.display = 'none';
+          document.getElementById('codigo-turno').value = '';
+        } else {
+          alert('❌ ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
+      });
+    }
+
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(date.setDate(diff));
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateReadable(date) {
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      return `${date.getDate()} de ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    function generateWeekCalendar() {
+      const calendarBody = document.getElementById('calendar-body');
+      const weekRange = document.getElementById('week-range');
+      
+      calendarBody.innerHTML = '';
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const weekStart = new Date(currentWeekStart);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      if (weekStart.getMonth() === weekEnd.getMonth()) {
+        weekRange.textContent = `${weekStart.getDate()} - ${weekEnd.getDate()} de ${months[weekStart.getMonth()]} ${weekStart.getFullYear()}`;
+      } else {
+        weekRange.textContent = `${weekStart.getDate()} ${months[weekStart.getMonth()]} - ${weekEnd.getDate()} ${months[weekEnd.getMonth()]} ${weekStart.getFullYear()}`;
+      }
+      
+      const row = document.createElement('tr');
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(currentDate.getDate() + i);
+        
+        const td = document.createElement('td');
+        const dateStr = formatDate(currentDate);
+        
+        if (currentDate.getTime() === today.getTime()) {
+          td.classList.add('today');
+        }
+        
+        if (occupiedSlots[dateStr]) {
+          td.classList.add('has-reservation');
+        }
+        
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = currentDate.getDate();
+        link.dataset.date = dateStr;
+        
+        if (occupiedSlots[dateStr]) {
+          link.innerHTML = `${currentDate.getDate()}<br><small>Reservado</small>`;
+        }
+        
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const selectedDate = this.dataset.date;
+          document.getElementById('fecha-display').value = formatDateReadable(currentDate);
+          document.getElementById('fecha-display').dataset.dateIso = selectedDate;
+          
+          loadTimeSlots(selectedDate);
+          
+          document.getElementById('reserva').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        td.appendChild(link);
+        row.appendChild(td);
+      }
+      
+      calendarBody.appendChild(row);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      currentWeekStart = getMonday(new Date());
+      generateWeekCalendar();
+      
+      const select = document.getElementById("tipo-servicio");
+      const precioText = document.getElementById("precio-servicio");
+
+      select.addEventListener("change", function() {
+        const precio = this.options[this.selectedIndex].dataset.precio;
+        
+        if (precio) {
+          precioText.textContent = `💰 Precio: $${precio}`;
+        } else {
+          precioText.textContent = "";
+        }
+      });
+    });
+
+    document.getElementById('prev-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+      generateWeekCalendar();
+    });
+
+    document.getElementById('next-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      generateWeekCalendar();
+    });
+
+    function loadTimeSlots(selectedDate) {
+      const timeSlotsGrid = document.getElementById('time-slots-grid');
+      const timeSlotsWrapper = document.getElementById('time-slots-wrapper');
+      const noDateMessage = document.getElementById('no-date-message');
+      
+      timeSlotsGrid.innerHTML = '';
+      selectedTimeSlot = null;
+      
+      if (!selectedDate) {
+        timeSlotsWrapper.style.display = 'none';
+        noDateMessage.style.display = 'block';
+        return;
+      }
+
+      timeSlotsWrapper.style.display = 'block';
+      noDateMessage.style.display = 'none';
+
+      const occupied = occupiedSlots[selectedDate] || [];
+
+      workingHours.forEach(time => {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.textContent = time;
+        slot.dataset.time = time;
+
+        if (occupied.includes(time)) {
+          slot.classList.add('occupied');
+          slot.innerHTML = time + '<br><small>Ocupado</small>';
+        } else {
+          slot.addEventListener('click', function() {
+            selectTimeSlot(this);
+          });
+        }
+
+        timeSlotsGrid.appendChild(slot);
+      });
+    }
+
+    function selectTimeSlot(slotElement) {
+      if (slotElement.classList.contains('occupied')) {
+        return;
+      }
+
+      document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+
+      slotElement.classList.add('selected');
+      selectedTimeSlot = slotElement.dataset.time;
+      document.getElementById('hora').value = selectedTimeSlot;
+    }
+
+    function nextStep(step) {
+      if (!validateStep(currentStep)) {
+        return;
+      }
+
+      document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+
+      currentStep = step;
+      document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+      document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+      if (step === 4) {
+        updateSummary();
+      }
+
+      document.querySelector('.booking-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function prevStep(step) {
+      document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+
+      currentStep = step;
+      document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+      document.querySelector(`.step[data-step="${step}"]`).classList.remove('completed');
+      document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+      document.querySelector('.booking-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const fecha = document.getElementById('fecha-display').value;
+        const hora = document.getElementById('hora').value;
+        if (!fecha) {
+          alert('⚠️ Por favor, selecciona una fecha en el calendario.');
+          return false;
+        }
+        if (!hora || !selectedTimeSlot) {
+          alert('⚠️ Por favor, selecciona un horario disponible.');
+          return false;
+        }
+      } else if (step === 2) {
+        const servicio = document.getElementById('tipo-servicio').value;
+        if (!servicio) {
+          alert('⚠️ Por favor, selecciona un tipo de servicio.');
+          return false;
+        }
+      } else if (step === 3) {
+        const nombre = document.getElementById('nombre').value;
+        const telefono = document.getElementById('telefono').value;
+        if (!nombre) {
+          alert('⚠️ Por favor, ingresa tu nombre.');
+          return false;
+        }
+        if (!telefono) {
+          alert('⚠️ Por favor, ingresa tu teléfono.');
+          return false;
+        }
+        if (!/^[0-9]+$/.test(telefono)) {
+          alert('⚠️ El teléfono solo debe contener números.');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function updateSummary() {
+      const fecha = document.getElementById('fecha-display').value;
+      const hora = document.getElementById('hora').value;
+      const servicio = document.getElementById('tipo-servicio');
+      const servicioTexto = servicio.options[servicio.selectedIndex].text;
+      const detalles = document.getElementById('detalles-trabajo').value || 'No especificado';
+      const nombre = document.getElementById('nombre').value;
+      const telefono = document.getElementById('telefono').value;
+
+      document.getElementById('resumen-fecha').textContent = fecha;
+      document.getElementById('resumen-hora').textContent = hora;
+      document.getElementById('resumen-servicio').textContent = servicioTexto;
+      document.getElementById('resumen-detalles').textContent = detalles;
+      document.getElementById('resumen-nombre').textContent = nombre;
+      document.getElementById('resumen-telefono').textContent = telefono;
+    }
+
+    document.getElementById("reserva-form").addEventListener("submit", function(e) {
+      const fechaDisplay = document.getElementById("fecha-display");
+      const fechaIso = fechaDisplay.dataset.dateIso;
+      const hora = document.getElementById("hora").value;
+      const tipoServicio = document.getElementById("tipo-servicio");
+      const servicioTexto = tipoServicio.options[tipoServicio.selectedIndex].text;
+      const precio = tipoServicio.options[tipoServicio.selectedIndex].dataset.precio;
+      const detallesTrabajo = document.getElementById("detalles-trabajo").value;
+      const nombre = document.getElementById("nombre").value;
+      const telefono = document.getElementById("telefono").value;
+      const tipoVehiculo = document.getElementById("tipo-vehiculo");
+      const vehiculoTexto = tipoVehiculo.options[tipoVehiculo.selectedIndex].text;
+
+      const codigoUnico = generarCodigoUnico();
+
+      document.getElementById("fecha-hidden").value = fechaIso + " " + hora + ":00";
+
+      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔑 ⚠️ IMPORTANTE: Guarda este código para gestionar tu turno\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    });
+</script>
+
+  <style>
+* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+    }
+
+    header {
+      background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #228B22;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(34, 139, 34, 0.15);
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .btn-gestionar {
+      background: linear-gradient(135deg, #1e7e34 0%, #228B22 100%);
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-block img {
+      height: 70px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(34, 139, 34, 0.2));
+      transition: transform 0.3s ease;
+    }
+
+    .logo-block img:hover {
+      transform: scale(1.05);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      cursor: pointer;
+      border-radius: 50px;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.05em;
+      transition: all 0.4s ease;
+      box-shadow: 0 6px 20px rgba(34, 139, 34, 0.3);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(34, 139, 34, 0.92), rgba(0, 100, 0, 0.92));
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: white;
+      text-align: center;
+      padding: 120px 20px;
+      font-size: 3.5em;
+      font-weight: 900;
+      text-shadow: 4px 4px 12px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      letter-spacing: 3px;
+      animation: fadeInUp 1s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, #e8f5e9, transparent);
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 60px 40px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .service-button {
+      background: white;
+      color: #228B22;
+      font-weight: bold;
+      border: none;
+      padding: 40px 30px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-size: 1.3em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #228B22, #32CD32);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .service-button:hover::before {
+      transform: scaleX(1);
+    }
+
+    .service-button .icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      transition: transform 0.4s ease;
+    }
+
+    .service-button:hover .icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .service-button:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(34, 139, 34, 0.25);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .modal:target {
+      display: flex;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 50px;
+      border-radius: 25px;
+      max-width: 650px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal:target .modal-content {
+      transform: scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      cursor: pointer;
+      font-size: 36px;
+      text-decoration: none;
+      color: #999;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-btn:hover {
+      color: #228B22;
+      background: #e8f5e9;
+      transform: rotate(90deg);
+    }
+
+    .modal-content h2 {
+      color: #228B22;
+      margin-bottom: 25px;
+      font-size: 2.2em;
+      border-bottom: 4px solid #228B22;
+      padding-bottom: 15px;
+    }
+
+    .modal-content p {
+      margin: 20px 0;
+      color: #555;
+      font-size: 1.15em;
+      line-height: 1.9;
+    }
+
+    .modal-content p strong {
+      color: #228B22;
+      font-size: 1.1em;
+    }
+
+    #turno-info p {
+      margin: 10px 0;
+      font-size: 1.05em;
+    }
+
+    .calendar-container {
+      padding: 50px 30px;
+      max-width: 1000px;
+      margin: 50px auto;
+      border-radius: 30px;
+      background: white;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+    }
+
+    .calendar-container h3 {
+      color: #228B22;
+      margin-bottom: 40px;
+      font-size: 2.5em;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .calendar-nav {
+      text-align: center;
+      margin-bottom: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .calendar-nav a {
+      text-decoration: none;
+      color: #228B22;
+      font-weight: bold;
+      padding: 12px 24px;
+      border: 2px solid #228B22;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      font-size: 1.05em;
+    }
+
+    .calendar-nav a:hover {
+      background: #228B22;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .calendar-nav span {
+      font-weight: bold;
+      color: #228B22;
+      font-size: 1.4em;
+    }
+
+    .calendar-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+      margin-bottom: 50px;
+    }
+
+    .calendar-table th {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      padding: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 12px;
+      font-size: 1.05em;
+      letter-spacing: 1px;
+    }
+
+    .calendar-table td {
+      background: #f8f9fa;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      height: 100px;
+      vertical-align: top;
+      border: 2px solid transparent;
+    }
+
+    .calendar-table td:hover {
+      background: #dcfce7;
+      transform: scale(1.08);
+      box-shadow: 0 8px 20px rgba(34, 139, 34, 0.2);
+      border-color: #228B22;
+    }
+
+    .calendar-table td a {
+      display: block;
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+      height: 100%;
+      padding: 8px;
+      font-size: 1.2em;
+    }
+
+    .calendar-table td.today {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      border: 3px solid #FFD700;
+      box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4);
+    }
+
+    .calendar-table td.today a {
+      color: white;
+    }
+
+    .calendar-table td.has-reservation {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffc107;
+    }
+
+    .booking-form {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      padding: 50px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(34, 139, 34, 0.1);
+    }
+
+    .booking-form h3 {
+      text-align: center;
+      color: #228B22;
+      margin-bottom: 35px;
+      font-size: 2.2em;
+      font-weight: 800;
+    }
+
+    .steps-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 50px;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .steps-indicator::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 12%;
+      right: 12%;
+      height: 4px;
+      background: #d1d5db;
+      z-index: 0;
+      border-radius: 10px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 12px;
+      transition: all 0.4s ease;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .step.active .step-circle {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+      transform: scale(1.3);
+      box-shadow: 0 6px 25px rgba(34, 139, 34, 0.5);
+    }
+
+    .step.completed .step-circle {
+      background: #228B22;
+      color: white;
+    }
+
+    .step.completed .step-circle::after {
+      content: '✓';
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .step.active .step-label {
+      color: #228B22;
+      font-size: 14px;
+    }
+
+    .step.completed .step-label {
+      color: #228B22;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #228B22;
+      font-weight: 700;
+      font-size: 1.15em;
+    }
+
+    .booking-form input[type="text"],
+    .booking-form input[type="tel"],
+    .booking-form input[type="time"],
+    .booking-form select,
+    .booking-form textarea {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 1.05em;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      background: white;
+    }
+
+    .booking-form input:focus,
+    .booking-form select:focus,
+    .booking-form textarea:focus {
+      outline: none;
+      border-color: #228B22;
+      box-shadow: 0 0 0 4px rgba(34, 139, 34, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .booking-form textarea {
+      resize: vertical;
+      min-height: 130px;
+    }
+
+    .form-navigation {
+      display: flex;
+      gap: 20px;
+      margin-top: 35px;
+    }
+
+    .form-navigation button {
+      flex: 1;
+      padding: 16px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.15em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .btn-prev {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-prev:hover {
+      background: #4b5563;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(34, 139, 34, 0.4);
+    }
+
+    .time-slots-container {
+      margin-top: 25px;
+      padding: 30px;
+      background: white;
+      border-radius: 20px;
+      border: 3px solid #dcfce7;
+    }
+
+    .time-slots-container h4 {
+      color: #228B22;
+      margin-bottom: 20px;
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+
+    .time-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 15px;
+    }
+
+    .time-slot {
+      padding: 16px;
+      background: white;
+      border: 3px solid #228B22;
+      border-radius: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      color: #228B22;
+      transition: all 0.3s ease;
+      font-size: 1.1em;
+    }
+
+    .time-slot:hover {
+      background: #228B22;
+      color: white;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(34, 139, 34, 0.3);
+    }
+
+    .time-slot.selected {
+      background: #228B22;
+      color: white;
+      box-shadow: 0 8px 25px rgba(34, 139, 34, 0.5);
+      transform: scale(1.05);
+    }
+
+    .time-slot.occupied {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .time-slot.occupied:hover {
+      background: #f3f4f6;
+      color: #9ca3af;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .no-date-selected {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 30px;
+      font-size: 1.1em;
+    }
+
+    footer {
+      text-align: center;
+      padding: 50px;
+      background: linear-gradient(135deg, #1e7e34 0%, #228B22 100%);
+      color: white;
+      margin-top: 60px;
+    }
+
+    .btn-footer-contact {
+      background: white;
+      color: #228B22;
+      padding: 14px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin: 15px 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-footer-contact:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+    }
+
+    .contact-link {
+      color: #228B22;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    .contact-link:hover {
+      color: #32CD32;
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+      z-index: 1000;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .whatsapp-float:hover {
+      transform: scale(1.15);
+      box-shadow: 0 12px 35px rgba(37, 211, 102, 0.8);
+      animation: none;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .header-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+      }
+
+      .header-buttons .btn {
+        width: 100%;
+      }
+
+      .logo-block img {
+        height: 60px;
+      }
+      
+      .hero {
+        font-size: 2.2em;
+        padding: 80px 20px;
+      }
+      
+      .services {
+        grid-template-columns: 1fr;
+        padding: 30px 20px;
+      }
+      
+      .calendar-table th, .calendar-table td {
+        padding: 10px;
+        height: 75px;
+        font-size: 0.9em;
+      }
+      
+      .booking-form {
+        padding: 30px 20px;
+      }
+
+      .modal-content {
+        padding: 35px 25px;
+        width: 95%;
+      }
+
+      .form-navigation {
+        flex-direction: column;
+      }
+
+      .steps-indicator {
+        padding: 0 10px;
+      }
+
+      .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+
+      .step.active .step-circle {
+        transform: scale(1.15);
+      }
+
+      .step-label {
+        font-size: 11px;
+      }
+    }
+  </style>
+
+</body>
+</html>

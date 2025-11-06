@@ -144,19 +144,21 @@ JAZZMIN_SETTINGS = {
     "site_header": "Administración LA27",
     "site_brand": "LA27 Detailing",
     "welcome_sign": "Bienvenido al Panel de Administración",
-    
-    # ✅ Modelos que SÍ existen en tu aplicación
+
+    # ✅ Logo/branding
+    "site_logo": "logola27.png",
+    "login_logo": "logola27.png",
+
     "search_model": [
         "reservas_app.Cliente",
         "reservas_app.Turnos", 
         "reservas_app.Trabajo",
         "reservas_app.TrabajoVehiculo",
     ],
-    
+
     "show_sidebar": True,
     "navigation_expanded": True,
-    
-    # ✅ Iconos para tus modelos reales
+
     "icons": {
         "reservas_app.Cliente": "fas fa-user",
         "reservas_app.Vehiculo": "fas fa-car",
@@ -167,33 +169,12 @@ JAZZMIN_SETTINGS = {
         "auth.User": "fas fa-user-shield",
         "auth.Group": "fas fa-users",
     },
-    
-    # ✅ Enlaces personalizados en el menú superior
-    "topmenu_links": [
-        {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Ver Calendario", "url": "/", "icon": "fas fa-calendar", "new_window": True},
-    ],
-    
-    # Desactiva el constructor de UI para evitar problemas
-    "show_ui_builder": False,
-}
 
-# (Opcional) 🎨 Ajustes de estilo visual
-JAZZMIN_UI_TWEAKS = {
-    "theme": "darkly",  # Tema oscuro, ideal para LA27
-    "navbar": "navbar-dark navbar-primary",
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_flat_style": True,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_child_indent": True,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-lightblue",
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    },
+    # ✅ Botones arriba
+    "topmenu_links": [
+        {"name": "Inicio Admin", "url": "admin:index"},
+        {"name": "Volver al Sitio", "url": "/", "new_window": False, "icon": "fas fa-home"},
+    ],
+
+    "show_ui_builder": False,
 }

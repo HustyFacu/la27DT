@@ -1,0 +1,611 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Override para fondo limpio */
+    body {
+        background-color: #f8f9fa !important;
+    }
+    
+    #content-main {
+        background-color: transparent !important;
+        padding: 0 !important;
+    }
+
+    .dashboard-wrapper {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 40px 30px;
+    }
+
+    /* Header elegante */
+    .dashboard-header {
+        margin-bottom: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-header h1 {
+        color: #1a202c;
+        font-size: 2.8em;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-date {
+        font-size: 1.1em;
+        color: #718096;
+        font-weight: 500;
+    }
+
+    /* Grid de estadísticas - 4 columnas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        margin-bottom: 50px;
+    }
+
+    @media (max-width: 1400px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+
+    .stat-card:hover::before {
+        width: 100%;
+        opacity: 0.1;
+    }
+
+    .stat-card.green::before {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .stat-card.blue::before {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .stat-card.yellow::before {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card.red::before {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .stat-icon {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .stat-card h2 {
+        font-size: 0.95em;
+        margin: 0 0 12px 0;
+        font-weight: 600;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+        font-size: 2.8em;
+        font-weight: 800;
+        margin: 10px 0;
+        color: #1a202c;
+        line-height: 1;
+    }
+
+    .stat-card .subtitle {
+        font-size: 0.9em;
+        color: #a0aec0;
+        font-weight: 500;
+        margin-top: 8px;
+    }
+
+    /* Sección de gráficos más elegante */
+    .charts-section {
+        margin-bottom: 50px;
+    }
+
+    .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 1200px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .chart-container.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f7fafc;
+    }
+
+    .chart-container h3 {
+        color: #1a202c;
+        font-size: 1.3em;
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chart-icon {
+        font-size: 1.4em;
+    }
+
+    /* Tabla moderna y elegante */
+    .table-section {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f7fafc;
+    }
+
+    .table-section h2 {
+        color: #1a202c;
+        font-size: 1.5em;
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .custom-table thead th {
+        padding: 18px 20px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9em;
+        letter-spacing: 0.5px;
+        color: white;
+        text-transform: uppercase;
+    }
+
+    .custom-table thead th:first-child {
+        border-radius: 12px 0 0 0;
+        padding-left: 25px;
+    }
+
+    .custom-table thead th:last-child {
+        border-radius: 0 12px 0 0;
+        padding-right: 25px;
+    }
+
+    .custom-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f7fafc;
+    }
+
+    .custom-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+        transform: scale(1.01);
+    }
+
+    .custom-table tbody td {
+        padding: 20px;
+        color: #4a5568;
+        font-size: 0.95em;
+    }
+
+    .custom-table tbody td:first-child {
+        padding-left: 25px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .custom-table tbody td:last-child {
+        padding-right: 25px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #cbd5e0;
+        font-size: 1.1em;
+    }
+
+    .empty-state::before {
+        content: '📭';
+        display: block;
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+
+    canvas {
+        max-height: 320px !important;
+    }
+
+    /* Badge para detalles */
+    .detail-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #edf2f7;
+        border-radius: 20px;
+        font-size: 0.85em;
+        color: #4a5568;
+    }
+
+    /* Animación suave al cargar */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card, .chart-container, .table-section {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    .chart-container:nth-child(1) { animation-delay: 0.5s; }
+    .chart-container:nth-child(2) { animation-delay: 0.6s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Header elegante -->
+    <div class="dashboard-header">
+        <h1>📊 Dashboard - La 27 Detailing</h1>
+        <div class="header-date">
+            {% now "l, d F Y" %}
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card green">
+            <span class="stat-icon">📅</span>
+            <h2>Turnos Hoy</h2>
+            <div class="value">{{ turnos_hoy }}/{{ turnos_max_dia }}</div>
+            <div class="subtitle">Horario: 09–12 y 15–19</div>
+        </div>
+
+        <div class="stat-card blue">
+            <span class="stat-icon">📆</span>
+            <h2>Turnos Este Mes</h2>
+            <div class="value">{{ turnos_mes }}</div>
+            <div class="subtitle">Total del mes actual</div>
+        </div>
+
+        <div class="stat-card yellow">
+            <span class="stat-icon">💰</span>
+            <h2>Ingresos Hoy</h2>
+            <div class="value">${{ ingresos_hoy|floatformat:0 }}</div>
+            <div class="subtitle">Facturación del día</div>
+        </div>
+
+        <div class="stat-card red">
+            <span class="stat-icon">💵</span>
+            <h2>Ingresos del Mes</h2>
+            <div class="value">${{ ingresos_mes|floatformat:0 }}</div>
+            <div class="subtitle">Acumulado mensual</div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-section">
+        <div class="charts-row">
+            <!-- Gráfico de Ingresos -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3><span class="chart-icon">📈</span> Ingresos Últimos 7 Días</h3>
+                </div>
+                <canvas id="ingresosChart"></canvas>
+            </div>
+
+            <!-- Gráfico de Servicios -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3><span class="chart-icon">🛠️</span> Servicios Más Solicitados</h3>
+                </div>
+                <canvas id="serviciosChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico de Vehículos -->
+        <div class="chart-container full-width">
+            <div class="chart-header">
+                <h3><span class="chart-icon">🚗</span> Tipos de Vehículos Atendidos</h3>
+            </div>
+            <canvas id="vehiculosChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabla de próximos turnos -->
+    <div class="table-section">
+        <div class="table-header">
+            <h2>📅 Próximos Turnos</h2>
+        </div>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Teléfono</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for turno in proximos_turnos %}
+                <tr>
+                    <td><strong>{{ turno.cliente.nombre }}</strong></td>
+                    <td>{{ turno.fecha_turno|date:"d/m/Y" }}</td>
+                    <td><strong>{{ turno.fecha_turno|time:"H:i" }}</strong></td>
+                    <td>{{ turno.cliente.telefono }}</td>
+                    <td>
+                        {% if turno.descripcion_usuario %}
+                            <span class="detail-badge">{{ turno.descripcion_usuario }}</span>
+                        {% else %}
+                            <span style="color: #cbd5e0;">Sin detalle</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        No hay turnos próximos programados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Colores modernos y elegantes
+    const colors = {
+        primary: {
+            gradient: ['#667eea', '#764ba2'],
+            solid: 'rgba(102, 126, 234, 0.8)',
+            line: 'rgba(102, 126, 234, 1)'
+        },
+        green: {
+            solid: 'rgba(56, 239, 125, 0.8)',
+            line: 'rgba(17, 153, 142, 1)'
+        },
+        multi: [
+            'rgba(102, 126, 234, 0.85)',
+            'rgba(79, 172, 254, 0.85)',
+            'rgba(56, 239, 125, 0.85)',
+            'rgba(245, 87, 108, 0.85)',
+            'rgba(254, 225, 64, 0.85)'
+        ]
+    };
+
+    // Configuración común mejorada
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                padding: 12,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                displayColors: false,
+                bodyFont: {
+                    size: 14
+                },
+                titleFont: {
+                    size: 13,
+                    weight: '600'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.03)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#718096',
+                    font: {
+                        size: 12
+                    },
+                    padding: 10
+                }
+            },
+            x: {
+                grid: {
+                    display: false,
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#718096',
+                    font: {
+                        size: 12
+                    },
+                    padding: 10
+                }
+            }
+        }
+    };
+
+    // Gráfico de Ingresos
+    const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+    new Chart(ingresosCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels_dias|safe }},
+            datasets: [{
+                label: 'Ingresos',
+                data: {{ ingresos_ultimos_dias|safe }},
+                backgroundColor: colors.primary.solid,
+                borderColor: colors.primary.line,
+                borderWidth: 2,
+                borderRadius: 10,
+                hoverBackgroundColor: colors.primary.line
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toLocaleString('es-AR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Servicios
+    const serviciosCtx = document.getElementById('serviciosChart').getContext('2d');
+    new Chart(serviciosCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ servicios_labels|safe }},
+            datasets: [{
+                label: 'Cantidad',
+                data: {{ servicios_cantidades|safe }},
+                backgroundColor: colors.multi,
+                borderRadius: 10,
+                borderWidth: 0
+            }]
+        },
+        options: commonOptions
+    });
+
+    // Gráfico de Vehículos (horizontal)
+    const vehiculosCtx = document.getElementById('vehiculosChart').getContext('2d');
+    new Chart(vehiculosCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ vehiculos_labels|safe }},
+            datasets: [{
+                label: 'Cantidad',
+                data: {{ vehiculos_cantidades|safe }},
+                backgroundColor: colors.green.solid,
+                borderColor: colors.green.line,
+                borderWidth: 2,
+                borderRadius: 10
+            }]
+        },
+        options: {
+            ...commonOptions,
+            indexAxis: 'y',
+            scales: {
+                ...commonOptions.scales,
+                x: {
+                    ...commonOptions.scales.y
+                },
+                y: {
+                    ...commonOptions.scales.x
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

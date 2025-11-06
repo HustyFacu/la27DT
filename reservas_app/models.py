@@ -32,7 +32,6 @@ class Vehiculo(models.Model):
 
 class Trabajo(models.Model):
     tipo_trabajo = models.CharField(max_length=100, verbose_name="Tipo de trabajo")
-    descripcion_usuario = models.TextField(blank=True, null=True, verbose_name="Detalles")
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio ($)")
 
     class Meta:
@@ -46,22 +45,19 @@ class Trabajo(models.Model):
 class Turnos(models.Model):
     fecha_turno = models.DateTimeField()
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='turnos')
+    descripcion_usuario = models.TextField(blank=True, null=True, verbose_name="Detalle del cliente")  # ✅ NUEVO
     codigo_unico = models.CharField(max_length=12, unique=True, blank=True, editable=False)
 
     def save(self, *args, **kwargs):
-        # Generar código único solo si no existe
         if not self.codigo_unico:
             self.codigo_unico = self.generar_codigo_unico()
         super().save(*args, **kwargs)
 
     def generar_codigo_unico(self):
-        """Genera un código único en formato LA27-ABC123"""
         while True:
             letras = ''.join(random.choices(string.ascii_uppercase, k=3))
             numeros = ''.join(random.choices(string.digits, k=3))
             codigo = f"LA27-{letras}{numeros}"
-            
-            # Verificar que no exista en la base de datos
             if not Turnos.objects.filter(codigo_unico=codigo).exists():
                 return codigo
 
