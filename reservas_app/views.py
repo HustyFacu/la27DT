@@ -12,17 +12,16 @@ def index(request):
     Vista principal del sitio La 27 Detailing.
     Maneja tanto GET (mostrar formulario) como POST (guardar reserva).
     """
-    
+
     if request.method == 'POST':
         # Obtener datos del formulario
         nombre = request.POST.get('nombre')
         telefono = request.POST.get('telefono')
-        tipo_servicio_id = request.POST.get('tipo_servicio')  # Este es el ID del trabajo
+        tipo_servicio_id = request.POST.get('tipo_servicio')  # ID del trabajo
         tipo_vehiculo = request.POST.get('tipo_vehiculo')
         detalles_trabajo = request.POST.get('detalles_trabajo', '')
         fecha_str = request.POST.get('fecha')
 
-        # Imprimir en consola para debugging
         print("=" * 50)
         print("📋 DATOS RECIBIDOS DEL FORMULARIO:")
         print(f"Nombre: {nombre}")
@@ -40,7 +39,7 @@ def index(request):
             return render(request, 'index.html', {'trabajos': trabajos})
 
         try:
-            # 1. Convertir fecha a datetime con zona horaria
+            # 1. Convertir fecha
             fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
             fecha_dt = timezone.make_aware(fecha_dt)
             print(f"✅ Fecha procesada: {fecha_dt}")
@@ -62,29 +61,19 @@ def index(request):
             )
             print(f"✅ Vehículo creado: {vehiculo}")
 
-            # 4. Obtener el trabajo por ID
-            try:
-                trabajo = Trabajo.objects.get(id=tipo_servicio_id)
-                print(f"✅ Trabajo encontrado: {trabajo}")
-            except Trabajo.DoesNotExist:
-                messages.error(request, '⚠️ El servicio seleccionado no existe.')
-                trabajos = Trabajo.objects.all()
-                return render(request, 'index.html', {'trabajos': trabajos})
+            # 4. Obtener el trabajo
+            trabajo = Trabajo.objects.get(id=tipo_servicio_id)
+            print(f"✅ Trabajo encontrado: {trabajo}")
 
-            # 5. Actualizar descripción del trabajo si se proporcionó
-            if detalles_trabajo:
-                trabajo.descripcion_usuario = detalles_trabajo
-                trabajo.save()
-                print(f"✅ Descripción actualizada: {detalles_trabajo}")
-
-            # 6. Crear turno
+            # 5. Crear turno con detalles del usuario
             turno = Turnos.objects.create(
                 fecha_turno=fecha_dt,
-                cliente=cliente
+                cliente=cliente,
+                descripcion_usuario=detalles_trabajo
             )
-            print(f"✅ Turno creado: {turno}")
+            print(f"✅ Turno creado con detalles: {detalles_trabajo}")
 
-            # 7. Crear TrabajoVehiculo (LA RELACIÓN CLAVE)
+            # 6. Crear relación trabajo-turno
             trabajo_vehiculo = TrabajoVehiculo.objects.create(
                 turno=turno,
                 trabajo=trabajo
@@ -104,7 +93,7 @@ def index(request):
             import traceback
             traceback.print_exc()
 
-    # GET: Mostrar formulario con lista de trabajos
+    # GET
     trabajos = Trabajo.objects.all()
     return render(request, 'index.html', {'trabajos': trabajos})
 
@@ -116,33 +105,28 @@ def buscar_turno(request):
     Retorna los datos del turno en formato JSON.
     """
     codigo = request.GET.get('codigo', '').strip().upper()
-    
+
     if not codigo:
         return JsonResponse({
             'success': False,
             'error': 'Código no proporcionado'
         }, status=400)
-    
+
     try:
-        # Buscar el turno por código único
         turno = Turnos.objects.select_related('cliente').prefetch_related('trabajos_vehiculo__trabajo').get(
             codigo_unico=codigo
         )
-        
-        # Obtener el primer trabajo relacionado (asumiendo que hay al menos uno)
+
         trabajo_vehiculo = turno.trabajos_vehiculo.first()
-        
         if not trabajo_vehiculo:
             return JsonResponse({
                 'success': False,
                 'error': 'No se encontró información del servicio para este turno'
             }, status=404)
-        
-        # Obtener el vehículo del cliente para este turno
+
         vehiculo = turno.cliente.vehiculos.first()
         tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else 'No especificado'
-        
-        # Preparar los datos para enviar
+
         data = {
             'success': True,
             'turno': {
@@ -151,16 +135,16 @@ def buscar_turno(request):
                 'hora': turno.fecha_turno.strftime('%H:%M'),
                 'servicio': trabajo_vehiculo.trabajo.tipo_trabajo,
                 'precio': str(trabajo_vehiculo.trabajo.precio),
-                'detalles': trabajo_vehiculo.trabajo.descripcion_usuario or 'Sin detalles especificados',
+                'detalles': turno.descripcion_usuario or 'Sin detalles especificados',
                 'vehiculo': tipo_vehiculo,
                 'nombre': turno.cliente.nombre,
                 'telefono': turno.cliente.telefono,
                 'turno_id': turno.id
             }
         }
-        
+
         return JsonResponse(data)
-        
+
     except Turnos.DoesNotExist:
         return JsonResponse({
             'success': False,
@@ -182,22 +166,22 @@ def cancelar_turno(request):
     Vista para cancelar un turno existente.
     """
     codigo = request.POST.get('codigo', '').strip().upper()
-    
+
     if not codigo:
         return JsonResponse({
             'success': False,
             'error': 'Código no proporcionado'
         }, status=400)
-    
+
     try:
         turno = Turnos.objects.get(codigo_unico=codigo)
         turno.delete()
-        
+
         return JsonResponse({
             'success': True,
             'message': 'Turno cancelado exitosamente'
         })
-        
+
     except Turnos.DoesNotExist:
         return JsonResponse({
             'success': False,
