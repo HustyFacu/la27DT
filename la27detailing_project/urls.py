@@ -6,7 +6,7 @@ import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('reservas_app.urls')),
+    path('', include('reservas_app.urls', namespace='reservas_app')),
 ]
 
 if settings.DEBUG:

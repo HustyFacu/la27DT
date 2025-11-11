@@ -4,6 +4,9 @@ from django.utils import timezone
 from datetime import datetime
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import logout
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from .models import Cliente, Trabajo, Turnos, TrabajoVehiculo, Vehiculo
 
 
@@ -193,3 +196,23 @@ def cancelar_turno(request):
             'success': False,
             'error': 'Error al cancelar el turno'
         }, status=500)
+
+
+@login_required
+def logout_view(request):
+    """
+    Vista para mostrar la página de confirmación de logout
+    """
+    if request.method == 'POST':
+        logout(request)
+        return redirect('admin:login')
+    
+    return render(request, 'admin/logout.html')
+
+@staff_member_required
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('/admin/login/?logged_out=true')
+    
+    return render(request, 'admin/logout.html')
