@@ -31,7 +31,6 @@
                 border: 3px solid {% if message.tags == 'success' %}#228B22{% else %}#dc2626{% endif %};
                 position: relative;">
       
-      <!-- Botón de cerrar -->
       <button onclick="this.parentElement.remove()" 
               style="position: absolute; 
                      top: 10px; 
@@ -52,7 +51,6 @@
         ×
       </button>
       
-      <!-- Mensaje con padding derecho para no chocar con la X -->
       <div style="padding-right: 30px;">
         {{ message }}
       </div>
@@ -325,17 +323,15 @@
     let selectedTimeSlot = null;
     let currentWeekStart = new Date(2025, 9, 27);
 
+    // ✨ TODOS los horarios disponibles (9-12 y 15-19)
     const workingHours = [
-      '08:00', '09:00', '10:00', '11:00', '12:00', 
-      '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+      '09:00', '10:00', '11:00', '12:00',  // Mañana: 4 turnos
+      '15:00', '16:00', '17:00', '18:00', '19:00'  // Tarde: 5 turnos
     ];
+    const TURNOS_MAX_DIA = 5;  // ✨ Pero máximo 5 turnos por día
 
-    const occupiedSlots = {
-      '2025-10-10': ['09:00', '14:00', '16:00'],
-      '2025-10-15': ['10:00', '15:00'],
-      '2025-10-20': ['08:00', '12:00', '17:00'],
-      '2025-10-30': ['09:00', '15:00']
-    };
+    // ✨ CAMBIO 2: Conectar con la base de datos
+    const occupiedSlots = {{ occupied_slots_json|safe }};
 
     function generarCodigoUnico() {
       const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -356,18 +352,15 @@
       event.preventDefault();
       const codigo = document.getElementById('codigo-turno').value.toUpperCase().trim();
       
-      // Validar formato
       if (!codigo.match(/^LA27-[A-Z]{3}[0-9]{3}$/)) {
         alert('❌ Código inválido. Por favor verifica tu código de reserva.\n\nEl formato debe ser: LA27-ABC123');
         return;
       }
       
-      // Hacer petición al backend
       fetch(`/buscar-turno/?codigo=${encodeURIComponent(codigo)}`)
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Mostrar los datos del turno
             document.getElementById('info-codigo').textContent = data.turno.codigo;
             document.getElementById('info-fecha').textContent = data.turno.fecha;
             document.getElementById('info-hora').textContent = data.turno.hora;
@@ -376,9 +369,7 @@
             document.getElementById('info-nombre').textContent = data.turno.nombre;
             document.getElementById('info-telefono').textContent = data.turno.telefono;
             
-            // Guardar el código para usar en cancelar
             document.getElementById('turno-info').dataset.codigo = data.turno.codigo;
-            
             document.getElementById('turno-info').style.display = 'block';
           } else {
             alert('❌ ' + data.error);
@@ -399,8 +390,6 @@
       if (!confirmar) return;
       
       const codigo = document.getElementById('turno-info').dataset.codigo;
-      
-      // Obtener el token CSRF
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       
       fetch('/cancelar-turno/', {
@@ -417,6 +406,7 @@
           alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
           document.getElementById('turno-info').style.display = 'none';
           document.getElementById('codigo-turno').value = '';
+          location.reload();  // ✨ CAMBIO 4: Recargar para actualizar calendario
         } else {
           alert('❌ ' + data.error);
         }
@@ -481,7 +471,11 @@
           td.classList.add('today');
         }
         
-        if (occupiedSlots[dateStr]) {
+        // ✨ CAMBIO 3: Calcular turnos libres
+        const turnosOcupados = (occupiedSlots[dateStr] || []).length;
+        const turnosLibres = TURNOS_MAX_DIA - turnosOcupados;
+        
+        if (turnosOcupados > 0) {
           td.classList.add('has-reservation');
         }
         
@@ -490,8 +484,11 @@
         link.textContent = currentDate.getDate();
         link.dataset.date = dateStr;
         
-        if (occupiedSlots[dateStr]) {
-          link.innerHTML = `${currentDate.getDate()}<br><small>Reservado</small>`;
+        // ✨ Mostrar turnos libres o "Completo"
+        if (turnosLibres > 0) {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #228B22; font-weight: bold;">${turnosLibres} libre${turnosLibres > 1 ? 's' : ''}</small>`;
+        } else {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #dc2626;">Completo</small>`;
         }
         
         link.addEventListener('click', function(e) {
@@ -697,7 +694,7 @@
 
       document.getElementById("fecha-hidden").value = fechaIso + " " + hora + ":00";
 
-      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔑 ⚠️ IMPORTANTE: Guarda este código para gestionar tu turno\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔑 ⚠️ IMPORTANTE: Guarda este código para gestionar tu turno\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━`);
     });
 </script>
 
