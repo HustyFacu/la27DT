@@ -4,7 +4,7 @@ from django.db.models import Sum, Count
 from django.shortcuts import render
 from django.contrib.admin.sites import site
 from django.contrib import admin
-from .models import Cliente, Vehiculo, Marca, Trabajo, Turnos, TrabajoVehiculo
+from .models import Cliente, Vehiculo, Marca, Trabajo, Turnos, TrabajoVehiculo, ConfiguracionWhatsApp
 
 
 # -------------------
@@ -94,10 +94,11 @@ class TrabajoVehiculoInline(admin.TabularInline):
 @admin.register(Turnos)
 class TurnosAdmin(admin.ModelAdmin):
     inlines = [TrabajoVehiculoInline]
-    list_display = ('cliente', 'fecha_turno', 'codigo_unico', 'get_descripcion_corta')
-    list_filter = ('fecha_turno',)
+    list_display = ('cliente', 'fecha_turno', 'codigo_unico', 'confirmado', 'mensaje_enviado', 'get_descripcion_corta')
+    list_filter = ('fecha_turno', 'confirmado', 'mensaje_enviado')
     search_fields = ('cliente__nombre', 'cliente__telefono', 'codigo_unico')
     readonly_fields = ('codigo_unico',)
+    list_editable = ('confirmado',)
 
     def get_descripcion_corta(self, obj):
         """Muestra el detalle del cliente de forma limpia"""
@@ -107,6 +108,21 @@ class TurnosAdmin(admin.ModelAdmin):
             return obj.descripcion_usuario
         return '—'
     get_descripcion_corta.short_description = 'Detalle del cliente'
+
+
+# ✅ NUEVO: Configuración WhatsApp
+@admin.register(ConfiguracionWhatsApp)
+class ConfiguracionWhatsAppAdmin(admin.ModelAdmin):
+    list_display = ('numero_whatsapp', 'activo', 'fecha_actualizacion')
+    list_editable = ('activo',)
+    
+    def has_add_permission(self, request):
+        # Solo permite crear si no existe ninguna configuración
+        return not ConfiguracionWhatsApp.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        # No permite borrar configuraciones
+        return False
 
 
 # ================================
