@@ -9,7 +9,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .models import Cliente, Trabajo, Turnos, TrabajoVehiculo, Vehiculo, ConfiguracionWhatsApp
 from django.db.models import Sum
-from .utils import enviar_whatsapp, generar_mensaje_reserva, generar_mensaje_cancelacion, generar_mensaje_modificacion
+from .utils import enviar_whatsapp, generar_mensaje_reserva, generar_mensaje_cancelacion, generar_mensaje_modificacion, obtener_vehiculo_del_turno
 import json
 
 
@@ -196,7 +196,7 @@ def confirmar_reserva(request):
     
     # Obtener información completa del turno
     trabajo_vehiculo = turno.trabajos_vehiculo.first()
-    vehiculo = turno.cliente.vehiculos.first()
+    vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ USA LA FUNCIÓN CORRECTA
     
     return render(request, 'reservas/confirmar_reserva.html', {
         'turno': turno,
@@ -231,7 +231,7 @@ def buscar_turno(request):
                 'error': 'No se encontró información del servicio para este turno'
             }, status=404)
 
-        vehiculo = turno.cliente.vehiculos.first()
+        vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ CORREGIDO AQUÍ TAMBIÉN
         tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else 'No especificado'
 
         data = {
@@ -333,9 +333,9 @@ def modificar_turno(request):
                 )
                 print(f"✅ Servicio creado: {nuevo_trabajo}")
 
-        # 5. Si se cambió el tipo de vehículo, actualizar
+        # 5. Si se cambió el tipo de vehículo, actualizar EL VEHÍCULO CORRECTO
         if nuevo_tipo_vehiculo:
-            vehiculo = turno.cliente.vehiculos.first()
+            vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ CORREGIDO
             if vehiculo:
                 vehiculo.tipo_vehiculo = nuevo_tipo_vehiculo
                 vehiculo.save()
