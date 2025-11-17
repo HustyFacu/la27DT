@@ -31,7 +31,6 @@
                 border: 3px solid {% if message.tags == 'success' %}#228B22{% else %}#dc2626{% endif %};
                 position: relative;">
       
-      <!-- Botón de cerrar -->
       <button onclick="this.parentElement.remove()" 
               style="position: absolute; 
                      top: 10px; 
@@ -52,7 +51,6 @@
         ×
       </button>
       
-      <!-- Mensaje con padding derecho para no chocar con la X -->
       <div style="padding-right: 30px;">
         {{ message }}
       </div>
@@ -116,6 +114,7 @@
     </div>
   </div>
 
+  <!-- MODAL GESTIONAR TURNO -->
   <div id="modal-gestionar" class="modal">
     <div class="modal-content">
       <a href="#" class="close-btn">&times;</a>
@@ -142,11 +141,93 @@
           <p><strong>Teléfono:</strong> <span id="info-telefono">-</span></p>
           
           <div style="display: flex; gap: 15px; margin-top: 25px;">
-            <button onclick="modificarTurno()" class="btn-prev" style="flex: 1;">✏️ Modificar</button>
+            <button onclick="mostrarFormularioModificar()" class="btn-prev" style="flex: 1;">✏️ Modificar</button>
             <button onclick="cancelarTurno()" class="btn-submit" style="flex: 1; background: #dc2626;">❌ Cancelar</button>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ✨ NUEVO: MODAL MODIFICAR TURNO -->
+  <div id="modal-modificar" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+      <a href="#" class="close-btn" onclick="cerrarModalModificar()">&times;</a>
+      <h2>✏️ Modificar Tu Turno</h2>
+      <p style="margin-bottom: 30px;">Actualiza los datos de tu reserva. El código <strong id="modificar-codigo">-</strong> se mantendrá igual.</p>
+      
+      <form id="form-modificar-turno" onsubmit="guardarModificacion(event)">
+        <input type="hidden" id="modificar-codigo-hidden" />
+
+        <!-- Nueva Fecha y Hora -->
+        <div class="form-group">
+          <label for="modificar-fecha-display">📅 Nueva Fecha (opcional):</label>
+          <input type="text" id="modificar-fecha-display" readonly placeholder="Selecciona una fecha en el calendario" style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em;" />
+        </div>
+
+        <!-- ✨ CALENDARIO MOVIDO AQUÍ - Justo después del campo de fecha -->
+        <div style="margin-bottom: 30px;">
+          <h4 style="color: #228B22; margin-bottom: 15px;">📅 Selecciona Nueva Fecha</h4>
+          <div class="calendar-nav">
+            <a href="#" id="modificar-prev-week">← Anterior</a>
+            <span id="modificar-week-range">-</span>
+            <a href="#" id="modificar-next-week">Siguiente →</a>
+          </div>
+          <table class="calendar-table" style="margin-top: 20px;">
+            <thead>
+              <tr>
+                <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
+              </tr>
+            </thead>
+            <tbody id="modificar-calendar-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Horarios disponibles -->
+        <div id="modificar-time-slots-wrapper" style="display: none; margin-bottom: 20px;">
+          <div class="time-slots-container">
+            <h4>🕐 Selecciona un nuevo horario:</h4>
+            <div class="time-slots-grid" id="modificar-time-slots-grid"></div>
+          </div>
+        </div>
+
+        <input type="hidden" id="modificar-hora" />
+
+        <!-- Tipo de Vehículo -->
+        <div class="form-group">
+          <label for="modificar-tipo-vehiculo">🚙 Tipo de vehículo:</label>
+          <select id="modificar-tipo-vehiculo" style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em;">
+            <option value="">Mantener actual</option>
+            <option value="auto">Auto</option>
+            <option value="camioneta">Camioneta</option>
+          </select>
+        </div>
+
+        <!-- Tipo de Servicio -->
+        <div class="form-group">
+          <label for="modificar-tipo-servicio">🚗 Tipo de servicio:</label>
+          <select id="modificar-tipo-servicio" style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em;">
+            <option value="">Mantener actual</option>
+            {% for trabajo in trabajos %}
+              <option value="{{ trabajo.id }}" data-precio="{{ trabajo.precio }}">
+                {{ trabajo.tipo_trabajo }} (${{ trabajo.precio }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Detalles -->
+        <div class="form-group">
+          <label for="modificar-detalles">📝 Nuevos detalles del trabajo:</label>
+          <textarea id="modificar-detalles" placeholder="Actualiza los detalles si es necesario..." style="width: 100%; padding: 16px 20px; border: 2px solid #d1d5db; border-radius: 12px; font-size: 1.05em; min-height: 100px; resize: vertical; font-family: inherit;"></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
+          <button type="button" onclick="cerrarModalModificar()" class="btn-prev" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn-submit" style="flex: 1;">💾 Guardar Cambios</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -324,18 +405,19 @@
     let currentStep = 1;
     let selectedTimeSlot = null;
     let currentWeekStart = new Date(2025, 9, 27);
+    
+    // ✨ NUEVAS VARIABLES PARA MODIFICAR TURNO
+    let modificarWeekStart = new Date(2025, 9, 27);
+    let modificarSelectedTimeSlot = null;
+    let turnoActualData = null;
 
     const workingHours = [
-      '08:00', '09:00', '10:00', '11:00', '12:00', 
-      '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+      '09:00', '10:00', '11:00', '12:00',
+      '15:00', '16:00', '17:00', '18:00', '19:00'
     ];
+    const TURNOS_MAX_DIA = 5;
 
-    const occupiedSlots = {
-      '2025-10-10': ['09:00', '14:00', '16:00'],
-      '2025-10-15': ['10:00', '15:00'],
-      '2025-10-20': ['08:00', '12:00', '17:00'],
-      '2025-10-30': ['09:00', '15:00']
-    };
+    const occupiedSlots = {{ occupied_slots_json|safe }};
 
     function generarCodigoUnico() {
       const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -356,18 +438,17 @@
       event.preventDefault();
       const codigo = document.getElementById('codigo-turno').value.toUpperCase().trim();
       
-      // Validar formato
       if (!codigo.match(/^LA27-[A-Z]{3}[0-9]{3}$/)) {
         alert('❌ Código inválido. Por favor verifica tu código de reserva.\n\nEl formato debe ser: LA27-ABC123');
         return;
       }
       
-      // Hacer petición al backend
       fetch(`/buscar-turno/?codigo=${encodeURIComponent(codigo)}`)
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Mostrar los datos del turno
+            turnoActualData = data.turno; // ✨ Guardar datos del turno
+            
             document.getElementById('info-codigo').textContent = data.turno.codigo;
             document.getElementById('info-fecha').textContent = data.turno.fecha;
             document.getElementById('info-hora').textContent = data.turno.hora;
@@ -376,9 +457,7 @@
             document.getElementById('info-nombre').textContent = data.turno.nombre;
             document.getElementById('info-telefono').textContent = data.turno.telefono;
             
-            // Guardar el código para usar en cancelar
             document.getElementById('turno-info').dataset.codigo = data.turno.codigo;
-            
             document.getElementById('turno-info').style.display = 'block';
           } else {
             alert('❌ ' + data.error);
@@ -390,42 +469,287 @@
         });
     }
 
-    function modificarTurno() {
-      alert('🔄 Función de modificación en desarrollo.\n\nPara modificar tu turno, por favor contáctanos por WhatsApp o teléfono.');
+    // ✨ NUEVA FUNCIÓN: Mostrar formulario de modificación
+    function mostrarFormularioModificar() {
+      if (!turnoActualData) {
+        alert('❌ Error: No se encontraron los datos del turno');
+        return;
+      }
+
+      document.getElementById('modificar-codigo').textContent = turnoActualData.codigo;
+      document.getElementById('modificar-codigo-hidden').value = turnoActualData.codigo;
+      document.getElementById('modificar-detalles').value = turnoActualData.detalles || '';
+      
+      const servicioSelect = document.getElementById('modificar-tipo-servicio');
+      if (turnoActualData.servicio_id) {
+        servicioSelect.value = turnoActualData.servicio_id;
+      }
+
+      window.location.hash = 'modal-modificar';
+      document.getElementById('modal-modificar').style.display = 'flex';
+      document.getElementById('modal-modificar').style.opacity = '1';
+      document.getElementById('modal-modificar').style.visibility = 'visible';
+      
+      generateModificarCalendar();
     }
 
-    function cancelarTurno() {
-      const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
-      if (!confirmar) return;
+    // ✨ NUEVA FUNCIÓN: Cerrar modal de modificación
+    function cerrarModalModificar() {
+      document.getElementById('modal-modificar').style.display = 'none';
+      document.getElementById('modal-modificar').style.opacity = '0';
+      document.getElementById('modal-modificar').style.visibility = 'hidden';
+      window.location.hash = 'modal-gestionar';
       
-      const codigo = document.getElementById('turno-info').dataset.codigo;
+      // Limpiar formulario
+      document.getElementById('modificar-fecha-display').value = '';
+      document.getElementById('modificar-hora').value = '';
+      document.getElementById('modificar-tipo-vehiculo').value = '';
+      document.getElementById('modificar-tipo-servicio').value = '';
+      document.getElementById('modificar-detalles').value = '';
+      document.getElementById('modificar-time-slots-wrapper').style.display = 'none';
+      modificarSelectedTimeSlot = null;
+    }
+
+    // ✨ NUEVA FUNCIÓN: Generar calendario en modal de modificación
+    function generateModificarCalendar() {
+      const calendarBody = document.getElementById('modificar-calendar-body');
+      const weekRange = document.getElementById('modificar-week-range');
       
-      // Obtener el token CSRF
-      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      calendarBody.innerHTML = '';
       
-      fetch('/cancelar-turno/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': csrftoken
-        },
-        body: `codigo=${encodeURIComponent(codigo)}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
-          document.getElementById('turno-info').style.display = 'none';
-          document.getElementById('codigo-turno').value = '';
-        } else {
-          alert('❌ ' + data.error);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const weekStart = new Date(modificarWeekStart);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      if (weekStart.getMonth() === weekEnd.getMonth()) {
+        weekRange.textContent = `${weekStart.getDate()} - ${weekEnd.getDate()} de ${months[weekStart.getMonth()]} ${weekStart.getFullYear()}`;
+      } else {
+        weekRange.textContent = `${weekStart.getDate()} ${months[weekStart.getMonth()]} - ${weekEnd.getDate()} ${months[weekEnd.getMonth()]} ${weekStart.getFullYear()}`;
+      }
+      
+      const row = document.createElement('tr');
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(currentDate.getDate() + i);
+        
+        const td = document.createElement('td');
+        const dateStr = formatDate(currentDate);
+        
+        if (currentDate.getTime() === today.getTime()) {
+          td.classList.add('today');
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
+        
+        const turnosOcupados = (occupiedSlots[dateStr] || []).length;
+        const turnosLibres = TURNOS_MAX_DIA - turnosOcupados;
+        
+        if (turnosOcupados > 0) {
+          td.classList.add('has-reservation');
+        }
+        
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = currentDate.getDate();
+        link.dataset.date = dateStr;
+        
+        if (turnosLibres > 0) {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #228B22; font-weight: bold;">${turnosLibres} libre${turnosLibres > 1 ? 's' : ''}</small>`;
+        } else {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #dc2626;">Completo</small>`;
+        }
+        
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const selectedDate = this.dataset.date;
+          document.getElementById('modificar-fecha-display').value = formatDateReadable(currentDate);
+          document.getElementById('modificar-fecha-display').dataset.dateIso = selectedDate;
+          
+          loadModificarTimeSlots(selectedDate);
+        });
+        
+        td.appendChild(link);
+        row.appendChild(td);
+      }
+      
+      calendarBody.appendChild(row);
+    }
+
+    // ✨ NUEVA FUNCIÓN: Cargar horarios en modal de modificación
+    function loadModificarTimeSlots(selectedDate) {
+      const timeSlotsGrid = document.getElementById('modificar-time-slots-grid');
+      const timeSlotsWrapper = document.getElementById('modificar-time-slots-wrapper');
+      
+      timeSlotsGrid.innerHTML = '';
+      modificarSelectedTimeSlot = null;
+      
+      if (!selectedDate) {
+        timeSlotsWrapper.style.display = 'none';
+        return;
+      }
+
+      timeSlotsWrapper.style.display = 'block';
+
+      const occupied = occupiedSlots[selectedDate] || [];
+
+      workingHours.forEach(time => {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.textContent = time;
+        slot.dataset.time = time;
+
+        if (occupied.includes(time)) {
+          slot.classList.add('occupied');
+          slot.innerHTML = time + '<br><small>Ocupado</small>';
+        } else {
+          slot.addEventListener('click', function() {
+            selectModificarTimeSlot(this);
+          });
+        }
+
+        timeSlotsGrid.appendChild(slot);
       });
     }
+
+    // ✨ NUEVA FUNCIÓN: Seleccionar horario en modal de modificación
+    function selectModificarTimeSlot(slotElement) {
+      if (slotElement.classList.contains('occupied')) {
+        return;
+      }
+
+      document.querySelectorAll('#modificar-time-slots-grid .time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+
+      slotElement.classList.add('selected');
+      modificarSelectedTimeSlot = slotElement.dataset.time;
+      document.getElementById('modificar-hora').value = modificarSelectedTimeSlot;
+    }
+
+    // ✨ NUEVA FUNCIÓN: Guardar modificación
+    function guardarModificacion(event) {
+  event.preventDefault();
+  
+  const codigo = document.getElementById('modificar-codigo-hidden').value;
+  const fechaDisplay = document.getElementById('modificar-fecha-display');
+  const fechaIso = fechaDisplay.dataset.dateIso;
+  const hora = document.getElementById('modificar-hora').value;
+  const tipoServicio = document.getElementById('modificar-tipo-servicio').value;
+  const tipoVehiculo = document.getElementById('modificar-tipo-vehiculo').value;
+  const detalles = document.getElementById('modificar-detalles').value;
+
+  if (!fechaIso && !tipoServicio && !tipoVehiculo && !detalles) {
+    alert('⚠️ Debes modificar al menos un campo para guardar los cambios.');
+    return;
+  }
+
+  if (fechaIso && !hora) {
+    alert('⚠️ Por favor selecciona un horario para la nueva fecha.');
+    return;
+  }
+
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const formData = new URLSearchParams();
+  formData.append('codigo', codigo);
+  
+  if (fechaIso && hora) {
+    formData.append('fecha', `${fechaIso} ${hora}:00`);
+  }
+  if (tipoServicio) {
+    formData.append('tipo_servicio', tipoServicio);
+  }
+  if (tipoVehiculo) {
+    formData.append('tipo_vehiculo', tipoVehiculo);
+  }
+  if (detalles) {
+    formData.append('detalles_trabajo', detalles);
+  }
+
+  fetch('/modificar-turno/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': csrftoken
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert(`✅ ¡Turno modificado exitosamente!\n\n🔑 Tu código sigue siendo: ${data.codigo}\n\nLos cambios se han guardado correctamente.`);
+      
+      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
+      if (data.whatsapp_url) {
+        console.log('📱 Abriendo WhatsApp...');
+        setTimeout(() => {
+          window.open(data.whatsapp_url, '_blank');
+        }, 500);
+      }
+      
+      cerrarModalModificar();
+      
+      // Recargar después de 1 segundo
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      alert('❌ ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('❌ Error al modificar el turno. Por favor intenta nuevamente.');
+  });
+}
+
+    function cancelarTurno() {
+  const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
+  if (!confirmar) return;
+  
+  const codigo = document.getElementById('turno-info').dataset.codigo;
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  
+  fetch('/cancelar-turno/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': csrftoken
+    },
+    body: `codigo=${encodeURIComponent(codigo)}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
+      
+      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
+      if (data.whatsapp_url) {
+        console.log('📱 Abriendo WhatsApp...');
+        setTimeout(() => {
+          window.open(data.whatsapp_url, '_blank');
+        }, 500);
+      }
+      
+      document.getElementById('turno-info').style.display = 'none';
+      document.getElementById('codigo-turno').value = '';
+      
+      // Recargar después de 1 segundo
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      alert('❌ ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
+  });
+}
 
     function getMonday(d) {
       const date = new Date(d);
@@ -481,7 +805,10 @@
           td.classList.add('today');
         }
         
-        if (occupiedSlots[dateStr]) {
+        const turnosOcupados = (occupiedSlots[dateStr] || []).length;
+        const turnosLibres = TURNOS_MAX_DIA - turnosOcupados;
+        
+        if (turnosOcupados > 0) {
           td.classList.add('has-reservation');
         }
         
@@ -490,8 +817,10 @@
         link.textContent = currentDate.getDate();
         link.dataset.date = dateStr;
         
-        if (occupiedSlots[dateStr]) {
-          link.innerHTML = `${currentDate.getDate()}<br><small>Reservado</small>`;
+        if (turnosLibres > 0) {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #228B22; font-weight: bold;">${turnosLibres} libre${turnosLibres > 1 ? 's' : ''}</small>`;
+        } else {
+          link.innerHTML = `${currentDate.getDate()}<br><small style="color: #dc2626;">Completo</small>`;
         }
         
         link.addEventListener('click', function(e) {
@@ -514,6 +843,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       currentWeekStart = getMonday(new Date());
+      modificarWeekStart = getMonday(new Date());
       generateWeekCalendar();
       
       const select = document.getElementById("tipo-servicio");
@@ -523,7 +853,7 @@
         const precio = this.options[this.selectedIndex].dataset.precio;
         
         if (precio) {
-          precioText.textContent = `💰 Precio: $${precio}`;
+          precioText.textContent = `💰 Precio: ${precio}`;
         } else {
           precioText.textContent = "";
         }
@@ -540,6 +870,19 @@
       e.preventDefault();
       currentWeekStart.setDate(currentWeekStart.getDate() + 7);
       generateWeekCalendar();
+    });
+
+    // ✨ NUEVOS EVENT LISTENERS: Navegación en modal de modificación
+    document.getElementById('modificar-prev-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      modificarWeekStart.setDate(modificarWeekStart.getDate() - 7);
+      generateModificarCalendar();
+    });
+
+    document.getElementById('modificar-next-week').addEventListener('click', function(e) {
+      e.preventDefault();
+      modificarWeekStart.setDate(modificarWeekStart.getDate() + 7);
+      generateModificarCalendar();
     });
 
     function loadTimeSlots(selectedDate) {
@@ -585,7 +928,7 @@
         return;
       }
 
-      document.querySelectorAll('.time-slot').forEach(slot => {
+      document.querySelectorAll('#time-slots-grid .time-slot').forEach(slot => {
         slot.classList.remove('selected');
       });
 
@@ -696,8 +1039,6 @@
       const codigoUnico = generarCodigoUnico();
 
       document.getElementById("fecha-hidden").value = fechaIso + " " + hora + ":00";
-
-      alert(`✅ ¡RESERVA CONFIRMADA!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 DATOS DE LA RESERVA\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🔑 ⚠️ IMPORTANTE: Guarda este código para gestionar tu turno\n\n📅 Fecha: ${fechaDisplay.value}\n🕐 Hora: ${hora}\n\n🚗 Vehículo: ${vehiculoTexto}\n⚙️ Servicio: ${servicioTexto}\n💰 Precio: ${precio}\n\n👤 Cliente: ${nombre}\n📱 Teléfono: ${telefono}\n\n📝 Detalles adicionales:\n${detallesTrabajo || 'Sin detalles especificados'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n¡Nos vemos pronto en La 27 Detailing! 🚗✨\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     });
 </script>
 
@@ -1517,6 +1858,7 @@
       .modal-content {
         padding: 35px 25px;
         width: 95%;
+        max-width: 95%;
       }
 
       .form-navigation {
@@ -1539,6 +1881,15 @@
 
       .step-label {
         font-size: 11px;
+      }
+
+      #modal-modificar .modal-content {
+        max-width: 95%;
+        padding: 25px 15px;
+      }
+
+      #modificar-time-slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       }
     }
   </style>

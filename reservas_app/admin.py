@@ -126,11 +126,11 @@ class ConfiguracionWhatsAppAdmin(admin.ModelAdmin):
 
 
 # ================================
-# 📊 DASHBOARD INDEX OVERRIDE
+# 📊 DASHBOARD INDEX OVERRIDE - CORREGIDO
 # ================================
 def custom_admin_index(request):
     """
-    Vista personalizada para el dashboard del admin
+    Vista personalizada para el dashboard del admin - CON DATOS REALES
     """
     # Obtener hora local correctamente según settings.py
     now_utc = timezone.now()
@@ -144,26 +144,38 @@ def custom_admin_index(request):
     print(f"📅 FECHA LOCAL: {today}")
     print("=" * 60)
 
-    # Métricas básicas
-    turnos_hoy = Turnos.objects.filter(fecha_turno__date=today).count()
+    # ✅ Métricas básicas REALES - USANDO RANGOS DE DATETIME
+    inicio_hoy = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_hoy = now_local.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    turnos_hoy = Turnos.objects.filter(
+        fecha_turno__gte=inicio_hoy,
+        fecha_turno__lte=fin_hoy
+    ).count()
     print(f"✅ Turnos HOY ({today}): {turnos_hoy}")
 
-    turnos_mes = Turnos.objects.filter(fecha_turno__date__gte=first_day_month).count()
+    inicio_mes = now_local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    turnos_mes = Turnos.objects.filter(fecha_turno__gte=inicio_mes).count()
     print(f"✅ Turnos ESTE MES (desde {first_day_month}): {turnos_mes}")
 
     ingresos_hoy = (
-        TrabajoVehiculo.objects.filter(turno__fecha_turno__date=today)
-        .aggregate(total=Sum("trabajo__precio"))["total"] or 0
+        TrabajoVehiculo.objects.filter(
+            turno__fecha_turno__gte=inicio_hoy,
+            turno__fecha_turno__lte=fin_hoy
+        ).aggregate(total=Sum("trabajo__precio"))["total"] or 0
     )
     print(f"💰 Ingresos HOY: ${ingresos_hoy}")
 
     ingresos_mes = (
-        TrabajoVehiculo.objects.filter(turno__fecha_turno__date__gte=first_day_month)
-        .aggregate(total=Sum("trabajo__precio"))["total"] or 0
+        TrabajoVehiculo.objects.filter(
+            turno__fecha_turno__gte=inicio_mes
+        ).aggregate(total=Sum("trabajo__precio"))["total"] or 0
     )
     print(f"💰 Ingresos MES: ${ingresos_mes}")
     print("=" * 60)
 
+    # ✅ Próximos turnos
     proximos_turnos = (
         Turnos.objects.filter(fecha_turno__gte=now_local)
         .select_related("cliente")
@@ -176,18 +188,34 @@ def custom_admin_index(request):
         print(f"   - {t.cliente.nombre}: {fecha_local}")
     print("=" * 60)
 
-    # 📊 Datos para gráficos
-    ingresos_ultimos_dias = []
-    labels_dias = []
+    # 🆕 INGRESOS ÚLTIMOS 7 DÍAS (DATOS REALES)
+    meses_es = {
+        1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril',
+        5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto',
+        9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
+    }
+    
+    dias_es = {
+        0: 'lunes', 1: 'martes', 2: 'miércoles', 3: 'jueves',
+        4: 'viernes', 5: 'sábado', 6: 'domingo'
+    }
+    
+    ingresos_dias_detalle = []
     for i in range(6, -1, -1):
         dia = today - timedelta(days=i)
         ingreso_dia = (
             TrabajoVehiculo.objects.filter(turno__fecha_turno__date=dia)
             .aggregate(total=Sum("trabajo__precio"))["total"] or 0
         )
-        ingresos_ultimos_dias.append(float(ingreso_dia))
-        labels_dias.append(dia.strftime('%d/%m'))
+        
+        # Formatear fecha en español: "lunes 11/11"
+        dia_semana = dias_es[dia.weekday()]
+        label = f"{dia_semana.capitalize()} {dia.strftime('%d/%m')}"
+        
+        ingresos_dias_detalle.append((label, float(ingreso_dia)))
+        print(f"💵 {label}: ${ingreso_dia}")
 
+    # 🆕 SERVICIOS MÁS SOLICITADOS (ÚLTIMOS 30 DÍAS)
     servicios_populares = (
         TrabajoVehiculo.objects.filter(
             turno__fecha_turno__date__gte=today - timedelta(days=30)
@@ -197,17 +225,11 @@ def custom_admin_index(request):
         .order_by('-cantidad')[:5]
     )
 
-    servicios_labels = [s['trabajo__tipo_trabajo'] for s in servicios_populares]
-    servicios_cantidades = [s['cantidad'] for s in servicios_populares]
-
-    vehiculos_stats = (
-        Vehiculo.objects.values('tipo_vehiculo')
-        .annotate(cantidad=Count('id'))
-        .order_by('-cantidad')[:5]
-    )
-
-    vehiculos_labels = [v['tipo_vehiculo'] or 'Sin especificar' for v in vehiculos_stats]
-    vehiculos_cantidades = [v['cantidad'] for v in vehiculos_stats]
+    print("=" * 60)
+    print("🏆 TOP 5 SERVICIOS:")
+    for idx, s in enumerate(servicios_populares, 1):
+        print(f"   {idx}. {s['trabajo__tipo_trabajo']}: {s['cantidad']} veces")
+    print("=" * 60)
 
     context = {
         **site.each_context(request),
@@ -218,6 +240,7 @@ def custom_admin_index(request):
         'has_permission': site.has_permission(request),
         'available_apps': site.get_app_list(request),
 
+        # ✅ Estadísticas principales
         "turnos_hoy": turnos_hoy,
         "turnos_mes": turnos_mes,
         "ingresos_hoy": ingresos_hoy,
@@ -225,15 +248,12 @@ def custom_admin_index(request):
         "turnos_max_dia": 5,
         "proximos_turnos": proximos_turnos,
 
-        "ingresos_ultimos_dias": ingresos_ultimos_dias,
-        "labels_dias": labels_dias,
-        "servicios_labels": servicios_labels,
-        "servicios_cantidades": servicios_cantidades,
-        "vehiculos_labels": vehiculos_labels,
-        "vehiculos_cantidades": vehiculos_cantidades,
+        # 🆕 NUEVOS DATOS PARA LISTAS
+        "ingresos_dias_detalle": ingresos_dias_detalle,
+        "servicios_populares": servicios_populares,
     }
 
-    return render(request, "admin/dashboard.html", context)
+    return render(request, "admin/index.html", context)
 
 
 # Reemplazar el index del admin
