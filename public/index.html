@@ -443,11 +443,23 @@
         return;
       }
       
+      const botonBuscar = event.target.querySelector('button[type="submit"]');
+      const textoOriginal = botonBuscar.textContent;
+      botonBuscar.textContent = 'Buscando...';
+      botonBuscar.disabled = true;
+      
       fetch(`/buscar-turno/?codigo=${encodeURIComponent(codigo)}`)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.error || 'Error al buscar el turno');
+            });
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
-            turnoActualData = data.turno; // ✨ Guardar datos del turno
+            turnoActualData = data.turno;
             
             document.getElementById('info-codigo').textContent = data.turno.codigo;
             document.getElementById('info-fecha').textContent = data.turno.fecha;
@@ -465,7 +477,11 @@
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('❌ Error al buscar el turno. Por favor intenta nuevamente.');
+          alert('❌ ' + error.message);
+        })
+        .finally(() => {
+          botonBuscar.textContent = textoOriginal;
+          botonBuscar.disabled = false;
         });
     }
 
@@ -630,126 +646,129 @@
       document.getElementById('modificar-hora').value = modificarSelectedTimeSlot;
     }
 
-    // ✨ NUEVA FUNCIÓN: Guardar modificación
+  // ✨ NUEVA FUNCIÓN: Guardar modificación
     function guardarModificacion(event) {
-  event.preventDefault();
-  
-  const codigo = document.getElementById('modificar-codigo-hidden').value;
-  const fechaDisplay = document.getElementById('modificar-fecha-display');
-  const fechaIso = fechaDisplay.dataset.dateIso;
-  const hora = document.getElementById('modificar-hora').value;
-  const tipoServicio = document.getElementById('modificar-tipo-servicio').value;
-  const tipoVehiculo = document.getElementById('modificar-tipo-vehiculo').value;
-  const detalles = document.getElementById('modificar-detalles').value;
-
-  if (!fechaIso && !tipoServicio && !tipoVehiculo && !detalles) {
-    alert('⚠️ Debes modificar al menos un campo para guardar los cambios.');
-    return;
-  }
-
-  if (fechaIso && !hora) {
-    alert('⚠️ Por favor selecciona un horario para la nueva fecha.');
-    return;
-  }
-
-  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  const formData = new URLSearchParams();
-  formData.append('codigo', codigo);
-  
-  if (fechaIso && hora) {
-    formData.append('fecha', `${fechaIso} ${hora}:00`);
-  }
-  if (tipoServicio) {
-    formData.append('tipo_servicio', tipoServicio);
-  }
-  if (tipoVehiculo) {
-    formData.append('tipo_vehiculo', tipoVehiculo);
-  }
-  if (detalles) {
-    formData.append('detalles_trabajo', detalles);
-  }
-
-  fetch('/modificar-turno/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-CSRFToken': csrftoken
-    },
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert(`✅ ¡Turno modificado exitosamente!\n\n🔑 Tu código sigue siendo: ${data.codigo}\n\nLos cambios se han guardado correctamente.`);
+      event.preventDefault();
       
-      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
-      if (data.whatsapp_url) {
-        console.log('📱 Abriendo WhatsApp...');
-        setTimeout(() => {
-          window.open(data.whatsapp_url, '_blank');
-        }, 500);
+      const codigo = document.getElementById('modificar-codigo-hidden').value;
+      const fechaDisplay = document.getElementById('modificar-fecha-display');
+      const fechaIso = fechaDisplay.dataset.dateIso;
+      const hora = document.getElementById('modificar-hora').value;
+      const tipoServicio = document.getElementById('modificar-tipo-servicio').value;
+      const tipoVehiculo = document.getElementById('modificar-tipo-vehiculo').value;
+      const detalles = document.getElementById('modificar-detalles').value;
+
+      if (!fechaIso && !tipoServicio && !tipoVehiculo && !detalles) {
+        alert('⚠️ Debes modificar al menos un campo para guardar los cambios.');
+        return;
       }
-      
-      cerrarModalModificar();
-      
-      // Recargar después de 1 segundo
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    } else {
-      alert('❌ ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('❌ Error al modificar el turno. Por favor intenta nuevamente.');
-  });
-}
 
+      if (fechaIso && !hora) {
+        alert('⚠️ Por favor selecciona un horario para la nueva fecha.');
+        return;
+      }
+
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const formData = new URLSearchParams();
+      formData.append('codigo', codigo);
+      
+      if (fechaIso && hora) {
+        formData.append('fecha', `${fechaIso} ${hora}:00`);
+      }
+      if (tipoServicio) {
+        formData.append('tipo_servicio', tipoServicio);
+      }
+      if (tipoVehiculo) {
+        formData.append('tipo_vehiculo', tipoVehiculo);
+      }
+      if (detalles) {
+        formData.append('detalles_trabajo', detalles);
+      }
+
+      fetch('/modificar-turno/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrftoken
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (data.whatsapp_url) {
+            window.open(data.whatsapp_url, '_blank');
+          }
+          
+          cerrarModalModificar();
+          setTimeout(() => {
+            location.reload();
+          }, 500);
+        } else {
+          alert('❌ ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error al modificar el turno. Por favor intenta nuevamente.');
+      });
+    }
+
+    // ✨ NUEVA FUNCIÓN: Cancelar turno
     function cancelarTurno() {
-  const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
-  if (!confirmar) return;
-  
-  const codigo = document.getElementById('turno-info').dataset.codigo;
-  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  
-  fetch('/cancelar-turno/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-CSRFToken': csrftoken
-    },
-    body: `codigo=${encodeURIComponent(codigo)}`
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
+      const codigo = document.getElementById('turno-info').dataset.codigo;
       
-      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
-      if (data.whatsapp_url) {
-        console.log('📱 Abriendo WhatsApp...');
-        setTimeout(() => {
-          window.open(data.whatsapp_url, '_blank');
-        }, 500);
+      if (!codigo) {
+        alert('❌ Error: No se encontró el código del turno');
+        return;
       }
-      
-      document.getElementById('turno-info').style.display = 'none';
-      document.getElementById('codigo-turno').value = '';
-      
-      // Recargar después de 1 segundo
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    } else {
-      alert('❌ ' + data.error);
+
+      if (!confirm(`¿Estás seguro de que deseas CANCELAR tu turno?\n\nCódigo: ${codigo}\n\nEsta acción no se puede deshacer.`)) {
+        return;
+      }
+
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const formData = new URLSearchParams();
+      formData.append('codigo', codigo);
+
+      fetch('/cancelar-turno/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrftoken
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (data.whatsapp_url) {
+            window.open(data.whatsapp_url, '_blank');
+          }
+          
+          alert('✅ ' + data.message);
+          
+          // Limpiar formulario
+          document.getElementById('codigo-turno').value = '';
+          document.getElementById('turno-info').style.display = 'none';
+          turnoActualData = null;
+          
+          // Cerrar modal
+          window.location.hash = '';
+          
+          // Recargar página para actualizar el calendario
+          setTimeout(() => {
+            location.reload();
+          }, 500);
+        } else {
+          alert('❌ ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
+      });
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
-  });
-}
 
     function getMonday(d) {
       const date = new Date(d);

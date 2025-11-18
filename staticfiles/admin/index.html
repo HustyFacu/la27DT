@@ -142,180 +142,6 @@
         margin-top: 8px;
     }
 
-    /* 🆕 NUEVA SECCIÓN DE LISTAS EN VEZ DE GRÁFICOS */
-    .info-section {
-        margin-bottom: 50px;
-    }
-
-    .info-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        margin-bottom: 30px;
-    }
-
-    @media (max-width: 1200px) {
-        .info-row {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .info-container {
-        background: white;
-        border-radius: 20px;
-        padding: 35px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        border: 1px solid rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-
-    .info-container:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    }
-
-    .info-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #f7fafc;
-    }
-
-    .info-container h3 {
-        color: #1a202c;
-        font-size: 1.3em;
-        margin: 0;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .info-icon {
-        font-size: 1.4em;
-    }
-
-    /* 🆕 LISTA DE INGRESOS */
-    .ingresos-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .ingreso-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid #f7fafc;
-        transition: all 0.2s ease;
-    }
-
-    .ingreso-item:last-child {
-        border-bottom: none;
-    }
-
-    .ingreso-item:hover {
-        background: linear-gradient(90deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
-        padding-left: 10px;
-        padding-right: 10px;
-        border-radius: 10px;
-    }
-
-    .ingreso-fecha {
-        font-weight: 600;
-        color: #4a5568;
-        font-size: 1em;
-    }
-
-    .ingreso-monto {
-        font-size: 1.2em;
-        font-weight: 700;
-        color: #667eea;
-    }
-
-    /* 🆕 TOP DE SERVICIOS */
-    .servicios-top {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .servicio-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 18px;
-        margin-bottom: 12px;
-        background: linear-gradient(90deg, #f7fafc 0%, #ffffff 100%);
-        border-radius: 12px;
-        border-left: 4px solid;
-        transition: all 0.3s ease;
-    }
-
-    .servicio-item:nth-child(1) {
-        border-left-color: #667eea;
-    }
-
-    .servicio-item:nth-child(2) {
-        border-left-color: #4facfe;
-    }
-
-    .servicio-item:nth-child(3) {
-        border-left-color: #38ef7d;
-    }
-
-    .servicio-item:nth-child(4) {
-        border-left-color: #f5576c;
-    }
-
-    .servicio-item:nth-child(5) {
-        border-left-color: #fee140;
-    }
-
-    .servicio-item:hover {
-        transform: translateX(8px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-
-    .servicio-rank {
-        font-size: 1.5em;
-        font-weight: 800;
-        color: #cbd5e0;
-        min-width: 35px;
-    }
-
-    .servicio-item:nth-child(1) .servicio-rank {
-        color: #667eea;
-    }
-
-    .servicio-item:nth-child(2) .servicio-rank {
-        color: #4facfe;
-    }
-
-    .servicio-item:nth-child(3) .servicio-rank {
-        color: #38ef7d;
-    }
-
-    .servicio-info {
-        flex: 1;
-    }
-
-    .servicio-nombre {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 1.05em;
-        margin-bottom: 3px;
-    }
-
-    .servicio-cantidad {
-        font-size: 1.8em;
-        font-weight: 800;
-        color: #1a202c;
-        text-align: right;
-    }
-
     /* Tabla moderna y elegante */
     .table-section {
         background: white;
@@ -417,11 +243,13 @@
     /* Badge para detalles */
     .detail-badge {
         display: inline-block;
-        padding: 4px 12px;
-        background: #edf2f7;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border: 1px solid #667eea30;
         border-radius: 20px;
-        font-size: 0.85em;
-        color: #4a5568;
+        font-size: 0.9em;
+        color: #667eea;
+        font-weight: 600;
     }
 
     /* Animación suave al cargar */
@@ -436,7 +264,7 @@
         }
     }
 
-    .stat-card, .info-container, .table-section {
+    .stat-card, .table-section {
         animation: fadeInUp 0.6s ease-out backwards;
     }
 
@@ -444,8 +272,8 @@
     .stat-card:nth-child(2) { animation-delay: 0.2s; }
     .stat-card:nth-child(3) { animation-delay: 0.3s; }
     .stat-card:nth-child(4) { animation-delay: 0.4s; }
-    .info-container:nth-child(1) { animation-delay: 0.5s; }
-    .info-container:nth-child(2) { animation-delay: 0.6s; }
+    .table-section:nth-of-type(1) { animation-delay: 0.5s; }
+    .table-section:nth-of-type(2) { animation-delay: 0.6s; }
 </style>
 {% endblock %}
 
@@ -490,46 +318,35 @@
         </div>
     </div>
 
-    <!-- 🆕 NUEVA SECCIÓN: LISTAS EN VEZ DE GRÁFICOS -->
-    <div class="info-section">
-        <div class="info-row">
-            <!-- Lista de Ingresos Últimos 7 Días -->
-            <div class="info-container">
-                <div class="info-header">
-                    <h3><span class="info-icon">📈</span> Ingresos Últimos 7 Días</h3>
-                </div>
-                <ul class="ingresos-list">
-                    {% for label, ingreso in ingresos_dias_detalle %}
-                    <li class="ingreso-item">
-                        <span class="ingreso-fecha">{{ label }}</span>
-                        <span class="ingreso-monto">${{ ingreso|floatformat:0 }}</span>
-                    </li>
-                    {% empty %}
-                    <li class="empty-state">No hay datos de ingresos</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- Top de Servicios Más Solicitados -->
-            <div class="info-container">
-                <div class="info-header">
-                    <h3><span class="info-icon">🏆</span> Top Servicios Más Solicitados</h3>
-                </div>
-                <ul class="servicios-top">
-                    {% for servicio in servicios_populares %}
-                    <li class="servicio-item">
-                        <span class="servicio-rank">#{{ forloop.counter }}</span>
-                        <div class="servicio-info">
-                            <div class="servicio-nombre">{{ servicio.trabajo__tipo_trabajo|title }}</div>
-                        </div>
-                        <span class="servicio-cantidad">{{ servicio.cantidad }}</span>
-                    </li>
-                    {% empty %}
-                    <li class="empty-state">No hay servicios registrados</li>
-                    {% endfor %}
-                </ul>
-            </div>
+    <!-- Top de Servicios Más Solicitados -->
+    <div class="table-section" style="margin-bottom: 40px;">
+        <div class="table-header">
+            <h2>🏆 Top Servicios Más Solicitados</h2>
         </div>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Ranking</th>
+                    <th>Servicio</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servicio in servicios_populares %}
+                <tr>
+                    <td><strong>#{{ forloop.counter }}</strong></td>
+                    <td>{{ servicio.trabajo__tipo_trabajo|title }}</td>
+                    <td><strong>{{ servicio.cantidad }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty-state">
+                        No hay servicios registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <!-- Tabla de próximos turnos -->
@@ -544,27 +361,37 @@
                     <th>Fecha</th>
                     <th>Hora</th>
                     <th>Teléfono</th>
-                    <th>Detalle</th>
+                    <th>Vehículo</th>
+                    <th>Servicio</th>
                 </tr>
             </thead>
             <tbody>
                 {% for turno in proximos_turnos %}
                 <tr>
-                    <td><strong>{{ turno.cliente.nombre }}</strong></td>
+                    <td><strong>{{ turno.cliente.nombre|title }}</strong></td>
                     <td>{{ turno.fecha_turno|date:"d/m/Y" }}</td>
                     <td><strong>{{ turno.fecha_turno|time:"H:i" }}</strong></td>
                     <td>{{ turno.cliente.telefono }}</td>
                     <td>
-                        {% if turno.descripcion_usuario %}
-                            <span class="detail-badge">{{ turno.descripcion_usuario }}</span>
+                        {% if turno.vehiculo %}
+                            {{ turno.vehiculo.tipo_vehiculo|title|default:"Sin especificar" }}
                         {% else %}
-                            <span style="color: #cbd5e0;">Sin detalle</span>
+                            <span style="color: #cbd5e0;">Sin vehículo</span>
                         {% endif %}
+                    </td>
+                    <td>
+                        {% with trabajo_vehiculo=turno.trabajos_vehiculo.first %}
+                            {% if trabajo_vehiculo %}
+                                <span class="detail-badge">{{ trabajo_vehiculo.trabajo.tipo_trabajo|title }}</span>
+                            {% else %}
+                                <span style="color: #cbd5e0;">Sin servicio</span>
+                            {% endif %}
+                        {% endwith %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="empty-state">
+                    <td colspan="6" class="empty-state">
                         No hay turnos próximos programados
                     </td>
                 </tr>

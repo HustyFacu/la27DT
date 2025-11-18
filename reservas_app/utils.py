@@ -1,6 +1,5 @@
 from urllib.parse import quote
 from django.utils import timezone
-from reservas_app.models import Vehiculo  # IMPORTANTE
 
 
 def enviar_whatsapp(numero_destino, mensaje):
@@ -29,19 +28,15 @@ def enviar_whatsapp(numero_destino, mensaje):
 
 
 # ============================================================
-#   🔥 FUNCIÓN CENTRAL PARA TOMAR EL VEHÍCULO CORRECTO 🔥
+#   🔥 FUNCIÓN SIMPLIFICADA - USA LA RELACIÓN DIRECTA 🔥
 # ============================================================
 
 def obtener_vehiculo_del_turno(turno):
     """
-    Obtiene el vehículo asociado al turno de manera correcta.
+    Obtiene el vehículo asociado al turno directamente.
+    Ahora Turno tiene un ForeignKey a Vehiculo.
     """
-    return (
-        Vehiculo.objects
-        .filter(cliente=turno.cliente)
-        .order_by("-id")  # Toma el último creado (el del turno)
-        .first()
-    )
+    return turno.vehiculo
 
 
 # ============================================================
@@ -63,8 +58,8 @@ def generar_mensaje_reserva(turno):
     trabajo_vehiculo = turno.trabajos_vehiculo.first()
     servicio = trabajo_vehiculo.trabajo.tipo_trabajo if trabajo_vehiculo else "No especificado"
 
-    # 🚘 OBTENER VEHÍCULO CORRECTO
-    vehiculo = obtener_vehiculo_del_turno(turno)
+    # 🚘 OBTENER VEHÍCULO DIRECTO
+    vehiculo = turno.vehiculo
     tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else "No especificado"
 
     mensaje = f"""✅ *¡Reserva confirmada!*
@@ -107,8 +102,8 @@ def generar_mensaje_cancelacion(turno):
     trabajo_vehiculo = turno.trabajos_vehiculo.first()
     servicio = trabajo_vehiculo.trabajo.tipo_trabajo if trabajo_vehiculo else "No especificado"
 
-    # 🚘 OBTENER VEHÍCULO CORRECTO
-    vehiculo = obtener_vehiculo_del_turno(turno)
+    # 🚘 OBTENER VEHÍCULO DIRECTO
+    vehiculo = turno.vehiculo
     tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else "No especificado"
 
     mensaje = f"""❌ *Turno Cancelado*
@@ -149,8 +144,8 @@ def generar_mensaje_modificacion(turno):
     trabajo_vehiculo = turno.trabajos_vehiculo.first()
     servicio = trabajo_vehiculo.trabajo.tipo_trabajo if trabajo_vehiculo else "No especificado"
 
-    # 🚘 OBTENER VEHÍCULO CORRECTO
-    vehiculo = obtener_vehiculo_del_turno(turno)
+    # 🚘 OBTENER VEHÍCULO DIRECTO
+    vehiculo = turno.vehiculo
     tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else "No especificado"
 
     mensaje = f"""🔄 *Turno Modificado*

@@ -126,23 +126,17 @@ class ConfiguracionWhatsAppAdmin(admin.ModelAdmin):
 
 
 # ================================
-# 📊 DASHBOARD INDEX OVERRIDE - CORREGIDO
+# 📊 DASHBOARD INDEX OVERRIDE
 # ================================
 def custom_admin_index(request):
     """
-    Vista personalizada para el dashboard del admin - CON DATOS REALES
+    Vista personalizada para el dashboard del admin
     """
     # Obtener hora local correctamente según settings.py
     now_utc = timezone.now()
     now_local = timezone.localtime(now_utc)
     today = now_local.date()
     first_day_month = today.replace(day=1)
-
-    print("=" * 60)
-    print(f"🕐 HORA ACTUAL DEL SERVIDOR (UTC): {now_utc}")
-    print(f"🕐 HORA LOCAL (Argentina): {now_local}")
-    print(f"📅 FECHA LOCAL: {today}")
-    print("=" * 60)
 
     # ✅ Métricas básicas REALES - USANDO RANGOS DE DATETIME
     inicio_hoy = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -152,12 +146,10 @@ def custom_admin_index(request):
         fecha_turno__gte=inicio_hoy,
         fecha_turno__lte=fin_hoy
     ).count()
-    print(f"✅ Turnos HOY ({today}): {turnos_hoy}")
 
     inicio_mes = now_local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     
     turnos_mes = Turnos.objects.filter(fecha_turno__gte=inicio_mes).count()
-    print(f"✅ Turnos ESTE MES (desde {first_day_month}): {turnos_mes}")
 
     ingresos_hoy = (
         TrabajoVehiculo.objects.filter(
@@ -165,15 +157,12 @@ def custom_admin_index(request):
             turno__fecha_turno__lte=fin_hoy
         ).aggregate(total=Sum("trabajo__precio"))["total"] or 0
     )
-    print(f"💰 Ingresos HOY: ${ingresos_hoy}")
 
     ingresos_mes = (
         TrabajoVehiculo.objects.filter(
             turno__fecha_turno__gte=inicio_mes
         ).aggregate(total=Sum("trabajo__precio"))["total"] or 0
     )
-    print(f"💰 Ingresos MES: ${ingresos_mes}")
-    print("=" * 60)
 
     # ✅ Próximos turnos
     proximos_turnos = (
@@ -181,12 +170,6 @@ def custom_admin_index(request):
         .select_related("cliente")
         .order_by("fecha_turno")[:10]
     )
-
-    print(f"📋 Próximos {proximos_turnos.count()} turnos:")
-    for t in proximos_turnos:
-        fecha_local = timezone.localtime(t.fecha_turno)
-        print(f"   - {t.cliente.nombre}: {fecha_local}")
-    print("=" * 60)
 
     # 🆕 INGRESOS ÚLTIMOS 7 DÍAS (DATOS REALES)
     meses_es = {
@@ -213,23 +196,18 @@ def custom_admin_index(request):
         label = f"{dia_semana.capitalize()} {dia.strftime('%d/%m')}"
         
         ingresos_dias_detalle.append((label, float(ingreso_dia)))
-        print(f"💵 {label}: ${ingreso_dia}")
 
-    # 🆕 SERVICIOS MÁS SOLICITADOS (ÚLTIMOS 30 DÍAS)
+    # 🆕 SERVICIOS MÁS SOLICITADOS DEL MES ACTUAL
+    mes_nombre = meses_es[today.month].capitalize()
+    
     servicios_populares = (
         TrabajoVehiculo.objects.filter(
-            turno__fecha_turno__date__gte=today - timedelta(days=30)
+            turno__fecha_turno__gte=inicio_mes
         )
         .values('trabajo__tipo_trabajo')
         .annotate(cantidad=Count('id'))
-        .order_by('-cantidad')[:5]
+        .order_by('-cantidad')
     )
-
-    print("=" * 60)
-    print("🏆 TOP 5 SERVICIOS:")
-    for idx, s in enumerate(servicios_populares, 1):
-        print(f"   {idx}. {s['trabajo__tipo_trabajo']}: {s['cantidad']} veces")
-    print("=" * 60)
 
     context = {
         **site.each_context(request),
@@ -251,6 +229,7 @@ def custom_admin_index(request):
         # 🆕 NUEVOS DATOS PARA LISTAS
         "ingresos_dias_detalle": ingresos_dias_detalle,
         "servicios_populares": servicios_populares,
+        "mes_actual": mes_nombre,  # 🆕 Nombre del mes para el título
     }
 
     return render(request, "admin/index.html", context)

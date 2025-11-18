@@ -680,22 +680,16 @@
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert(`✅ ¡Turno modificado exitosamente!\n\n🔑 Tu código sigue siendo: ${data.codigo}\n\nLos cambios se han guardado correctamente.`);
-      
-      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
+      // 📱 Abrir WhatsApp automáticamente
       if (data.whatsapp_url) {
-        console.log('📱 Abriendo WhatsApp...');
-        setTimeout(() => {
-          window.open(data.whatsapp_url, '_blank');
-        }, 500);
+        window.open(data.whatsapp_url, '_blank');
       }
       
+      // Cerrar modal y recargar
       cerrarModalModificar();
-      
-      // Recargar después de 1 segundo
       setTimeout(() => {
         location.reload();
-      }, 1000);
+      }, 500);
     } else {
       alert('❌ ' + data.error);
     }
@@ -703,51 +697,6 @@
   .catch(error => {
     console.error('Error:', error);
     alert('❌ Error al modificar el turno. Por favor intenta nuevamente.');
-  });
-}
-
-    function cancelarTurno() {
-  const confirmar = confirm('⚠️ ¿Estás seguro que deseas cancelar tu turno?\n\nEsta acción no se puede deshacer.');
-  if (!confirmar) return;
-  
-  const codigo = document.getElementById('turno-info').dataset.codigo;
-  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  
-  fetch('/cancelar-turno/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-CSRFToken': csrftoken
-    },
-    body: `codigo=${encodeURIComponent(codigo)}`
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('✅ Tu turno ha sido cancelado exitosamente.\n\nEsperamos verte pronto en La 27 Detailing.');
-      
-      // 📱 NUEVO: Abrir WhatsApp si hay URL disponible
-      if (data.whatsapp_url) {
-        console.log('📱 Abriendo WhatsApp...');
-        setTimeout(() => {
-          window.open(data.whatsapp_url, '_blank');
-        }, 500);
-      }
-      
-      document.getElementById('turno-info').style.display = 'none';
-      document.getElementById('codigo-turno').value = '';
-      
-      // Recargar después de 1 segundo
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    } else {
-      alert('❌ ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('❌ Error al cancelar el turno. Por favor intenta nuevamente.');
   });
 }
 

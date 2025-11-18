@@ -45,10 +45,11 @@ class Trabajo(models.Model):
 class Turnos(models.Model):
     fecha_turno = models.DateTimeField()
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='turnos')
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.SET_NULL, null=True, blank=True, related_name='turnos')  # 🆕 NUEVO
     descripcion_usuario = models.TextField(blank=True, null=True, verbose_name="Detalle del cliente")
     codigo_unico = models.CharField(max_length=12, unique=True, blank=True, editable=False)
-    confirmado = models.BooleanField(default=False, verbose_name="Turno confirmado")  # ✅ NUEVO
-    mensaje_enviado = models.BooleanField(default=False, verbose_name="WhatsApp enviado")  # ✅ NUEVO
+    confirmado = models.BooleanField(default=False, verbose_name="Turno confirmado")
+    mensaje_enviado = models.BooleanField(default=False, verbose_name="WhatsApp enviado")
 
     def save(self, *args, **kwargs):
         if not self.codigo_unico:
@@ -80,7 +81,6 @@ class TrabajoVehiculo(models.Model):
         return f"{self.turno} - {self.trabajo}"
 
 
-# ✅✅✅ ESTE ES EL MODELO QUE TE FALTABA ✅✅✅
 class ConfiguracionWhatsApp(models.Model):
     numero_whatsapp = models.CharField(
         max_length=20, 

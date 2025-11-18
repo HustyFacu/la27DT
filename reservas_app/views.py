@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .models import Cliente, Trabajo, Turnos, TrabajoVehiculo, Vehiculo, ConfiguracionWhatsApp
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from .utils import enviar_whatsapp, generar_mensaje_reserva, generar_mensaje_cancelacion, generar_mensaje_modificacion, obtener_vehiculo_del_turno
 import json
 
@@ -71,10 +71,11 @@ def index(request):
             trabajo = Trabajo.objects.get(id=tipo_servicio_id)
             print(f"✅ Trabajo encontrado: {trabajo}")
 
-            # 5. Crear turno con detalles del usuario
+            # 5. Crear turno con detalles del usuario Y VEHÍCULO
             turno = Turnos.objects.create(
                 fecha_turno=fecha_dt,
                 cliente=cliente,
+                vehiculo=vehiculo,  # 🆕 NUEVO: Guardar relación directa
                 descripcion_usuario=detalles_trabajo
             )
             print(f"✅ Turno creado con código: {turno.codigo_unico}")
@@ -196,7 +197,7 @@ def confirmar_reserva(request):
     
     # Obtener información completa del turno
     trabajo_vehiculo = turno.trabajos_vehiculo.first()
-    vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ USA LA FUNCIÓN CORRECTA
+    vehiculo = obtener_vehiculo_del_turno(turno)
     
     return render(request, 'reservas/confirmar_reserva.html', {
         'turno': turno,
@@ -231,7 +232,7 @@ def buscar_turno(request):
                 'error': 'No se encontró información del servicio para este turno'
             }, status=404)
 
-        vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ CORREGIDO AQUÍ TAMBIÉN
+        vehiculo = obtener_vehiculo_del_turno(turno)
         tipo_vehiculo = vehiculo.tipo_vehiculo if vehiculo else 'No especificado'
 
         data = {
@@ -335,7 +336,7 @@ def modificar_turno(request):
 
         # 5. Si se cambió el tipo de vehículo, actualizar EL VEHÍCULO CORRECTO
         if nuevo_tipo_vehiculo:
-            vehiculo = obtener_vehiculo_del_turno(turno)  # ✅ CORREGIDO
+            vehiculo = obtener_vehiculo_del_turno(turno)
             if vehiculo:
                 vehiculo.tipo_vehiculo = nuevo_tipo_vehiculo
                 vehiculo.save()
@@ -487,12 +488,14 @@ def dashboard(request):
     mes_actual = hoy.month
     año_actual = hoy.year
 
+    # ✅ Contadores básicos
     turnos_hoy = Turnos.objects.filter(fecha_turno__date=hoy).count()
     turnos_mes = Turnos.objects.filter(
         fecha_turno__month=mes_actual,
         fecha_turno__year=año_actual
     ).count()
 
+    # ✅ Ingresos
     ingresos_hoy = (
         TrabajoVehiculo.objects.filter(turno__fecha_turno__date=hoy)
         .aggregate(total=Sum('trabajo__precio'))['total'] or 0
@@ -505,9 +508,28 @@ def dashboard(request):
         .aggregate(total=Sum('trabajo__precio'))['total'] or 0
     )
 
+    # ✅ Próximos turnos - CON PREFETCH DE VEHÍCULOS Y TRABAJOS
     proximos_turnos = Turnos.objects.filter(
-        fecha_turno__gte=hoy
-    ).select_related('cliente').order_by('fecha_turno')[:10]
+        fecha_turno__gte=timezone.now()
+    ).select_related('cliente').prefetch_related('trabajos_vehiculo__trabajo').order_by('fecha_turno')[:10]
+
+    # ✅ Agregar vehículo a cada turno
+    for turno in proximos_turnos:
+        turno.vehiculo = obtener_vehiculo_del_turno(turno)
+
+    # 🆕 TOP DE SERVICIOS MÁS SOLICITADOS
+    servicios_populares = (
+        TrabajoVehiculo.objects
+        .values('trabajo__tipo_trabajo')
+        .annotate(cantidad=Count('id'))
+        .order_by('-cantidad')[:5]
+    )
+
+    # 🔍 DEBUG: Ver qué se está enviando
+    print("=" * 50)
+    print("🔍 CONTEXT ENVIADO AL TEMPLATE:")
+    print(f"servicios_populares: {list(servicios_populares)}")
+    print("=" * 50)
 
     context = {
         'turnos_hoy': turnos_hoy,
@@ -516,12 +538,7 @@ def dashboard(request):
         'ingresos_mes': ingresos_mes,
         'turnos_max_dia': 12,
         'proximos_turnos': proximos_turnos,
-        'labels_dias': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-        'ingresos_ultimos_dias': [10000, 12000, 8000, 15000, 20000, 18000, 22000],
-        'servicios_labels': ['Lavado', 'Pulido', 'Cerámica', 'Interior', 'Motor'],
-        'servicios_cantidades': [20, 15, 10, 8, 5],
-        'vehiculos_labels': ['Auto', 'SUV', 'Camioneta', 'Moto'],
-        'vehiculos_cantidades': [30, 12, 15, 3],
+        'servicios_populares': servicios_populares,
     }
 
     return render(request, 'dashboard.html', context)
